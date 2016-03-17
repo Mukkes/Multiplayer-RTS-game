@@ -14,6 +14,8 @@ public class Unit : WorldObject
 	protected override void Awake()
 	{
 		base.Awake();
+		moveSpeed = 1;
+		rotateSpeed = 1;
 	}
 
 	protected override void Start()

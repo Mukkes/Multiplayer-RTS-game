@@ -104,4 +104,15 @@ public class WorldObject : MonoBehaviour
 			if (hoverObject.name != "Ground") player.hud.SetCursorState(CursorState.Select);
 		}
 	}
+
+	public bool IsOwnedBy(Player owner)
+	{
+		if (player && player.Equals(owner))
+		{
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }
