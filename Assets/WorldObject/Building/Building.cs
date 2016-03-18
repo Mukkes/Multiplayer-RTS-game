@@ -12,6 +12,7 @@ public class Building : WorldObject
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
 	public Texture2D sellImage;
+	private bool needsBuilding = false;
 
 	protected override void Awake()
 	{
@@ -37,6 +38,7 @@ public class Building : WorldObject
 	protected override void OnGUI()
 	{
 		base.OnGUI();
+		if (needsBuilding) DrawBuildProgress();
 	}
 
 	protected void CreateUnit(string unitName)
@@ -140,5 +142,39 @@ public class Building : WorldObject
 		if (player) player.AddResource(ResourceType.Money, sellValue);
 		if (currentlySelected) SetSelection(false, playingArea);
 		Destroy(this.gameObject);
+	}
+
+	public void StartConstruction()
+	{
+		CalculateBounds();
+		needsBuilding = true;
+		hitPoints = 0;
+	}
+
+	private void DrawBuildProgress()
+	{
+		GUI.skin = ResourceManager.SelectBoxSkin;
+		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
+		//Draw the selection box around the currently selected object, within the bounds of the main draw area
+		GUI.BeginGroup(playingArea);
+		CalculateCurrentHealth(0.5f, 0.99f);
+		DrawHealthBar(selectBox, "Building ...");
+		GUI.EndGroup();
+	}
+
+	public bool UnderConstruction()
+	{
+		return needsBuilding;
+	}
+
+	public void Construct(int amount)
+	{
+		hitPoints += amount;
+		if (hitPoints >= maxHitPoints)
+		{
+			hitPoints = maxHitPoints;
+			needsBuilding = false;
+			RestoreMaterials();
+		}
 	}
 }
