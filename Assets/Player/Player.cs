@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
 	public bool human;
 	public HUD hud;
 	public Material notAllowedMaterial, allowedMaterial;
+	public Color teamColor;
 
 	private Dictionary<ResourceType, int> resources, resourceLimits;
 	private Building tempBuilding;
