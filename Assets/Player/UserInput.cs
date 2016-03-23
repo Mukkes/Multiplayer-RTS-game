@@ -18,6 +18,7 @@ public class UserInput : MonoBehaviour
 	{
 		if (player.human)
 		{
+			if (Input.GetKeyDown(KeyCode.Escape)) OpenPauseMenu();
 			MoveCamera();
 			RotateCamera();
 			MouseActivity();
@@ -194,5 +195,14 @@ public class UserInput : MonoBehaviour
 				}
 			}
 		}
+	}
+
+	private void OpenPauseMenu()
+	{
+		Time.timeScale = 0.0f;
+		GetComponentInChildren<PauseMenu>().enabled = true;
+		GetComponent<UserInput>().enabled = false;
+		Cursor.visible = true;
+		ResourceManager.MenuOpen = true;
 	}
 }
