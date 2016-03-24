@@ -35,11 +35,16 @@ public class Menu : MonoBehaviour
 		//header image
 		GUI.DrawTexture(new Rect(ResourceManager.Padding, ResourceManager.Padding, ResourceManager.HeaderWidth, ResourceManager.HeaderHeight), header);
 
+		//welcome message
+		float leftPos = ResourceManager.Padding;
+		float topPos = 2 * ResourceManager.Padding + header.height;
+		GUI.Label(new Rect(leftPos, topPos, ResourceManager.MenuWidth - 2 * ResourceManager.Padding, ResourceManager.TextHeight), "Welcome " + PlayerManager.GetPlayerName());
+
 		//menu buttons
 		if (buttons != null)
 		{
-			float leftPos = ResourceManager.MenuWidth / 2 - ResourceManager.ButtonWidth / 2;
-			float topPos = 2 * ResourceManager.Padding + header.height;
+			leftPos = ResourceManager.MenuWidth / 2 - ResourceManager.ButtonWidth / 2;
+			topPos += ResourceManager.TextHeight + ResourceManager.Padding;
 			for (int i = 0; i < buttons.Length; i++)
 			{
 				if (i > 0) topPos += ResourceManager.ButtonHeight + ResourceManager.Padding;
@@ -65,11 +70,12 @@ public class Menu : MonoBehaviour
 
 	protected virtual float GetMenuHeight()
 	{
+		float messageHeight = ResourceManager.TextHeight + ResourceManager.Padding;
 		float buttonHeight = 0;
 		if (buttons != null) buttonHeight = buttons.Length * ResourceManager.ButtonHeight;
 		float paddingHeight = 2 * ResourceManager.Padding;
 		if (buttons != null) paddingHeight += buttons.Length * ResourceManager.Padding;
-		return ResourceManager.HeaderHeight + buttonHeight + paddingHeight;
+		return ResourceManager.HeaderHeight + buttonHeight + paddingHeight + messageHeight;
 	}
 
 	protected void ExitGame()
