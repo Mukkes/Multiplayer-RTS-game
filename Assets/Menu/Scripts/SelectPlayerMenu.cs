@@ -21,6 +21,11 @@ public class SelectPlayerMenu : MonoBehaviour
 
 	void OnGUI()
 	{
+		if (SelectionList.MouseDoubleClick())
+		{
+			playerName = SelectionList.GetCurrentEntry();
+			SelectPlayer();
+		}
 
 		GUI.skin = mySkin;
 

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Newtonsoft.Json;
+using RTS;
+using UnityEngine;
 
 public class Worker : Unit
 {
@@ -82,5 +84,13 @@ public class Worker : Unit
 			}
 		}
 		if (doBase) base.MouseClick(hitObject, hitPoint, controller);
+	}
+
+	public override void SaveDetails(JsonWriter writer)
+	{
+		base.SaveDetails(writer);
+		SaveManager.WriteBoolean(writer, "Building", building);
+		SaveManager.WriteFloat(writer, "AmountBuilt", amountBuilt);
+		if (currentProject) SaveManager.WriteInt(writer, "CurrentProjectId", currentProject.ObjectId);
 	}
 }

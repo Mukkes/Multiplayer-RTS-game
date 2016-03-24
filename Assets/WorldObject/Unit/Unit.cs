@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RTS;
+using Newtonsoft.Json;
 
 public class Unit : WorldObject
 {
@@ -157,5 +158,19 @@ public class Unit : WorldObject
 	public virtual void SetBuilding(Building creator)
 	{
 		//specific initialization for a unit can be specified here
+	}
+
+	public override void SaveDetails(JsonWriter writer)
+	{
+		base.SaveDetails(writer);
+		SaveManager.WriteBoolean(writer, "Moving", moving);
+		SaveManager.WriteBoolean(writer, "Rotating", rotating);
+		SaveManager.WriteVector(writer, "Destination", destination);
+		SaveManager.WriteQuaternion(writer, "TargetRotation", targetRotation);
+		if (destinationTarget)
+		{
+			WorldObject destinationObject = destinationTarget.GetComponent<WorldObject>();
+			if (destinationObject) SaveManager.WriteInt(writer, "DestinationTargetId", destinationObject.ObjectId);
+		}
 	}
 }
