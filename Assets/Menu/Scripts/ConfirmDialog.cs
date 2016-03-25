@@ -2,14 +2,17 @@
 
 public class ConfirmDialog
 {
-
+	private AudioClip clickSound;
+	private AudioElement audioElement;
 	private bool confirming = false, clickYes = false, clickNo = false;
 	private Rect confirmRect;
 	private float buttonWidth = 50, buttonHeight = 20, padding = 10;
 	private Vector2 messageDimensions;
 
-	public void StartConfirmation()
+	public void StartConfirmation(AudioClip clickSound, AudioElement audioElement)
 	{
+		this.clickSound = clickSound;
+		this.audioElement = audioElement;
 		confirming = true;
 		clickYes = false;
 		clickNo = false;
@@ -70,15 +73,21 @@ public class ConfirmDialog
 		float buttonTop = messageDimensions.y + padding;
 		if (GUI.Button(new Rect(buttonLeft, buttonTop, buttonWidth, buttonHeight), "Yes"))
 		{
+			PlayClick();
 			confirming = false;
 			clickYes = true;
 		}
 		buttonLeft += buttonWidth + padding;
 		if (GUI.Button(new Rect(buttonLeft, buttonTop, buttonWidth, buttonHeight), "No"))
 		{
+			PlayClick();
 			confirming = false;
 			clickNo = true;
 		}
 	}
 
+	private void PlayClick()
+	{
+		if (audioElement != null) audioElement.Play(clickSound);
+	}
 }

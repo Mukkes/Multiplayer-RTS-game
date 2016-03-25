@@ -10,6 +10,7 @@ public class GameObjectList : MonoBehaviour {
 	public GameObject[] units;
 	public GameObject[] worldObjects;
 	public GameObject player;
+	public Texture2D[] avatars;
 
 	void Awake()
 	{
@@ -18,6 +19,8 @@ public class GameObjectList : MonoBehaviour {
 			DontDestroyOnLoad(transform.gameObject);
 			ResourceManager.SetGameObjectList(this);
 			created = true;
+			PlayerManager.Load();
+			PlayerManager.SetAvatarTextures(avatars);
 		}
 		else {
 			Destroy(this.gameObject);
@@ -81,5 +84,10 @@ public class GameObjectList : MonoBehaviour {
 			if (unit && unit.name == name) return unit.buildImage;
 		}
 		return null;
+	}
+
+	public Texture2D[] GetAvatars()
+	{
+		return avatars;
 	}
 }

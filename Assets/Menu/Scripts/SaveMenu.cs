@@ -1,17 +1,29 @@
 ﻿using UnityEngine;
 using RTS;
+using System.Collections.Generic;
 
 public class SaveMenu : MonoBehaviour
 {
 
 	public GUISkin mySkin, selectionSkin;
+	public AudioClip clickSound;
+	public float clickVolume = 1.0f;
 
+	private AudioElement audioElement;
 	private string saveName = "NewGame";
 	private ConfirmDialog confirmDialog = new ConfirmDialog();
 
 	void Start()
 	{
 		Activate();
+
+		if (clickVolume < 0.0f) clickVolume = 0.0f;
+		if (clickVolume > 1.0f) clickVolume = 1.0f;
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		sounds.Add(clickSound);
+		volumes.Add(clickVolume);
+		audioElement = new AudioElement(sounds, volumes, "SaveMenu", null);
 	}
 
 	void Update()
@@ -45,6 +57,7 @@ public class SaveMenu : MonoBehaviour
 		else {
 			if (SelectionList.MouseDoubleClick())
 			{
+				PlayClick();
 				saveName = SelectionList.GetCurrentEntry();
 				StartSave();
 			}
@@ -76,11 +89,13 @@ public class SaveMenu : MonoBehaviour
 		float topPos = menuHeight - ResourceManager.Padding - ResourceManager.ButtonHeight;
 		if (GUI.Button(new Rect(leftPos, topPos, ResourceManager.ButtonWidth, ResourceManager.ButtonHeight), "Save Game"))
 		{
+			PlayClick();
 			StartSave();
 		}
 		leftPos += ResourceManager.ButtonWidth + ResourceManager.Padding;
 		if (GUI.Button(new Rect(leftPos, topPos, ResourceManager.ButtonWidth, ResourceManager.ButtonHeight), "Cancel"))
 		{
+			PlayClick();
 			CancelSave();
 		}
 		//text area for player to type new name
@@ -115,7 +130,7 @@ public class SaveMenu : MonoBehaviour
 	private void StartSave()
 	{
 		//prompt for override of name if necessary
-		if (SelectionList.Contains(saveName)) confirmDialog.StartConfirmation();
+		if (SelectionList.Contains(saveName)) confirmDialog.StartConfirmation(clickSound, audioElement);
 		else SaveGame();
 	}
 
@@ -133,5 +148,10 @@ public class SaveMenu : MonoBehaviour
 		GetComponent<SaveMenu>().enabled = false;
 		PauseMenu pause = GetComponent<PauseMenu>();
 		if (pause) pause.enabled = true;
+	}
+
+	private void PlayClick()
+	{
+		if (audioElement != null) audioElement.Play(clickSound);
 	}
 }

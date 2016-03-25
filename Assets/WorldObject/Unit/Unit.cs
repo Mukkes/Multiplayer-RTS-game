@@ -2,10 +2,13 @@
 using System.Collections;
 using RTS;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class Unit : WorldObject
 {
 	public float moveSpeed, rotateSpeed;
+	public AudioClip driveSound, moveSound;
+	public float driveVolume = 0.5f, moveVolume = 1.0f;
 
 	protected bool moving, rotating;
 
@@ -87,6 +90,7 @@ public class Unit : WorldObject
 
 	public virtual void StartMove(Vector3 destination)
 	{
+		if (audioElement != null) audioElement.Play(moveSound);
 		this.destination = destination;
 		targetRotation = Quaternion.LookRotation(destination - transform.position);
 		rotating = true;
@@ -107,6 +111,7 @@ public class Unit : WorldObject
 		Quaternion inverseTargetRotation = new Quaternion(-targetRotation.x, -targetRotation.y, -targetRotation.z, -targetRotation.w);
 		if (transform.rotation == targetRotation || transform.rotation == inverseTargetRotation)
 		{
+			if (audioElement != null) audioElement.Play(driveSound);
 			rotating = false;
 			moving = true;
 		}
@@ -120,6 +125,7 @@ public class Unit : WorldObject
 		transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * moveSpeed);
 		if (transform.position == destination)
 		{
+			if (audioElement != null) audioElement.Stop(driveSound);
 			moving = false;
 			movingIntoPosition = false;
 		}
@@ -191,5 +197,21 @@ public class Unit : WorldObject
 			case "DestinationTargetId": loadedDestinationTargetId = (int)(System.Int64)readValue; break;
 			default: break;
 		}
+	}
+
+	protected override void InitialiseAudio()
+	{
+		base.InitialiseAudio();
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		if (driveVolume < 0.0f) driveVolume = 0.0f;
+		if (driveVolume > 1.0f) driveVolume = 1.0f;
+		volumes.Add(driveVolume);
+		sounds.Add(driveSound);
+		if (moveVolume < 0.0f) moveVolume = 0.0f;
+		if (moveVolume > 1.0f) moveVolume = 1.0f;
+		sounds.Add(moveSound);
+		volumes.Add(moveVolume);
+		audioElement.Add(sounds, volumes);
 	}
 }

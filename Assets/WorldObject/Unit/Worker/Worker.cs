@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
 using RTS;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Worker : Unit
 {
-
+	public AudioClip finishedJobSound;
+	public float finishedJobVolume = 1.0f;
 	public int buildSpeed;
 
 	private Building currentProject;
@@ -38,7 +40,11 @@ public class Worker : Unit
 				{
 					amountBuilt -= amount;
 					currentProject.Construct(amount);
-					if (!currentProject.UnderConstruction()) building = false;
+					if (!currentProject.UnderConstruction())
+					{
+						if (audioElement != null) audioElement.Play(finishedJobSound);
+						building = false;
+					}
 				}
 			}
 		}
@@ -110,5 +116,17 @@ public class Worker : Unit
 			case "CurrentProjectId": loadedProjectId = (int)(System.Int64)readValue; break;
 			default: break;
 		}
+	}
+
+	protected override void InitialiseAudio()
+	{
+		base.InitialiseAudio();
+		if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
+		if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		sounds.Add(finishedJobSound);
+		volumes.Add(finishedJobVolume);
+		audioElement.Add(sounds, volumes);
 	}
 }

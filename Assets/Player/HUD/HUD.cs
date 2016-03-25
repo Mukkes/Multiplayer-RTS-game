@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 public class HUD : MonoBehaviour
 {
-
 	private const int ORDERS_BAR_WIDTH = 150;
 	private const int RESOURCE_BAR_HEIGHT = 40;
 	private const int SELECTION_NAME_HEIGHT = 21;
@@ -14,16 +13,6 @@ public class HUD : MonoBehaviour
 	private const int BUTTON_SPACING = 7;
 	private const int SCROLL_BAR_WIDTH = 22;
 	private const int BUILD_IMAGE_PADDING = 8;
-
-	private Player player;
-	private CursorState activeCursorState;
-	private int currentFrame = 0;
-	private Dictionary<ResourceType, int> resourceValues, resourceLimits;
-	private Dictionary<ResourceType, Texture2D> resourceImages;
-	private WorldObject lastSelection;
-	private float sliderValue;
-	private int buildAreaHeight = 0;
-	private CursorState previousCursorState;
 
 	public GUISkin resourceSkin, ordersSkin, selectBoxSkin, mouseCursorSkin, playerDetailsSkin;
 	public Texture2D activeCursor;
@@ -36,7 +25,20 @@ public class HUD : MonoBehaviour
 	public Texture2D rallyPointCursor;
 	public Texture2D healthy, damaged, critical;
 	public Texture2D[] resourceHealthBars;
-	
+	public AudioClip clickSound;
+	public float clickVolume = 1.0f;
+
+	private Player player;
+	private CursorState activeCursorState;
+	private int currentFrame = 0;
+	private Dictionary<ResourceType, int> resourceValues, resourceLimits;
+	private Dictionary<ResourceType, Texture2D> resourceImages;
+	private WorldObject lastSelection;
+	private float sliderValue;
+	private int buildAreaHeight = 0;
+	private CursorState previousCursorState;
+	private AudioElement audioElement;
+
 	// Use this for initialization
 	void Start()
 	{
@@ -79,6 +81,12 @@ public class HUD : MonoBehaviour
 			}
 		}
 		ResourceManager.SetResourceHealthBarTextures(resourceHealthBarTextures);
+
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		sounds.Add(clickSound);
+		volumes.Add(clickVolume);
+		audioElement = new AudioElement(sounds, volumes, "HUD", null);
 	}
 
 	// Update is called once per frame
@@ -152,6 +160,7 @@ public class HUD : MonoBehaviour
 
 		if (GUI.Button(menuButtonPosition, "Menu"))
 		{
+			PlayClick();
 			Time.timeScale = 0.0f;
 			PauseMenu pauseMenu = GetComponent<PauseMenu>();
 			if (pauseMenu) pauseMenu.enabled = true;
@@ -315,7 +324,11 @@ public class HUD : MonoBehaviour
 				//create the button and handle the click of that button
 				if (GUI.Button(pos, action))
 				{
-					if (player.SelectedObject) player.SelectedObject.PerformAction(actions[i]);
+					if (player.SelectedObject)
+					{
+						PlayClick();
+						player.SelectedObject.PerformAction(actions[i]);
+					}
 				}
 			}
 		}
@@ -378,6 +391,7 @@ public class HUD : MonoBehaviour
 		int height = BUILD_IMAGE_HEIGHT / 2;
 		if (GUI.Button(new Rect(leftPos, topPos, width, height), building.sellImage))
 		{
+			PlayClick();
 			building.Sell();
 		}
 		if (building.hasSpawnPoint())
@@ -385,6 +399,7 @@ public class HUD : MonoBehaviour
 			leftPos += width + BUTTON_SPACING;
 			if (GUI.Button(new Rect(leftPos, topPos, width, height), building.rallyPointImage))
 			{
+				PlayClick();
 				if (activeCursorState != CursorState.RallyPoint && previousCursorState != CursorState.RallyPoint) SetCursorState(CursorState.RallyPoint);
 				else {
 					//dirty hack to ensure toggle between RallyPoint and not works ...
@@ -424,5 +439,10 @@ public class HUD : MonoBehaviour
 		playerDetailsSkin.GetStyle("label").CalcMinMaxWidth(new GUIContent(playerName), out minWidth, out maxWidth);
 		GUI.Label(new Rect(leftPos, topPos, maxWidth, height), playerName);
 		GUI.EndGroup();
+	}
+
+	private void PlayClick()
+	{
+		if (audioElement != null) audioElement.Play(clickSound);
 	}
 }

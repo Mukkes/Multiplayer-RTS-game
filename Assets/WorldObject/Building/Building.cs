@@ -6,14 +6,18 @@ using Newtonsoft.Json;
 
 public class Building : WorldObject
 {
+	public AudioClip finishedJobSound;
+	public float finishedJobVolume = 1.0f;
 	public Texture2D rallyPointImage;
 	public float maxBuildProgress;
+	public Texture2D sellImage;
+	
 	protected Queue<string> buildQueue;
 	protected Vector3 rallyPoint;
+
+	private bool needsBuilding = false;
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
-	public Texture2D sellImage;
-	private bool needsBuilding = false;
 
 	protected override void Awake()
 	{
@@ -54,7 +58,11 @@ public class Building : WorldObject
 			currentBuildProgress += Time.deltaTime * ResourceManager.BuildSpeed;
 			if (currentBuildProgress > maxBuildProgress)
 			{
-				if (player) player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, this);
+				if (player)
+				{
+					if (audioElement != null) audioElement.Play(finishedJobSound);
+					player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, this);
+				}
 				currentBuildProgress = 0.0f;
 			}
 		}
@@ -204,5 +212,17 @@ public class Building : WorldObject
 			case "PlayingArea": playingArea = LoadManager.LoadRect(reader); break;
 			default: break;
 		}
+	}
+
+	protected override void InitialiseAudio()
+	{
+		base.InitialiseAudio();
+		if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
+		if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		sounds.Add(finishedJobSound);
+		volumes.Add(finishedJobVolume);
+		audioElement.Add(sounds, volumes);
 	}
 }
