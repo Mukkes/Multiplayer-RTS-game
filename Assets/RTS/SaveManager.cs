@@ -162,7 +162,8 @@ namespace RTS
 
 			writer.WritePropertyName(name);
 			//make sure no bracketed values get stored (e.g. Tank(Clone) becomes Tank)
-			if (entry.Contains("(")) writer.WriteValue(entry.Substring(0, entry.IndexOf("(")));
+			if (entry.Contains(" ")) writer.WriteValue(entry.Substring(0, entry.IndexOf(" ")));
+			else if (entry.Contains("(")) writer.WriteValue(entry.Substring(0, entry.IndexOf("(")));
 			else writer.WriteValue(entry);
 		}
 
@@ -207,7 +208,7 @@ namespace RTS
 			writer.WriteEndObject();
 		}
 
-		public static void SavePlayerResources(JsonWriter writer, Dictionary<ResourceType, int> resources)
+		public static void SavePlayerResources(JsonWriter writer, Dictionary<ResourceType, int> resources, Dictionary<ResourceType, int> resourceLimits)
 		{
 			if (writer == null) return;
 
@@ -217,6 +218,12 @@ namespace RTS
 			{
 				writer.WriteStartObject();
 				WriteInt(writer, pair.Key.ToString(), pair.Value);
+				writer.WriteEndObject();
+			}
+			foreach (KeyValuePair<ResourceType, int> pair in resourceLimits)
+			{
+				writer.WriteStartObject();
+				WriteInt(writer, pair.Key.ToString() + "_Limit", pair.Value);
 				writer.WriteEndObject();
 			}
 			writer.WriteEndArray();
@@ -259,6 +266,23 @@ namespace RTS
 				writer.WriteValue(v);
 			}
 			writer.WriteEndArray();
+		}
+
+		public static void WriteRect(JsonWriter writer, string name, Rect rect)
+		{
+			if (writer == null) return;
+
+			writer.WritePropertyName(name);
+			writer.WriteStartObject();
+			writer.WritePropertyName("x");
+			writer.WriteValue(rect.x);
+			writer.WritePropertyName("y");
+			writer.WriteValue(rect.y);
+			writer.WritePropertyName("width");
+			writer.WriteValue(rect.width);
+			writer.WritePropertyName("height");
+			writer.WriteValue(rect.height);
+			writer.WriteEndObject();
 		}
 	}
 }

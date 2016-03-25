@@ -8,7 +8,7 @@ public class MainMenu : Menu
 
 	protected override void SetButtons()
 	{
-		buttons = new string[] { "New Game", "Change Player", "Quit Game" };
+		buttons = new string[] { "New Game", "Load Game", "Change Player", "Quit Game" };
 	}
 
 	protected override void HandleButton(string text)
@@ -16,6 +16,7 @@ public class MainMenu : Menu
 		switch (text)
 		{
 			case "New Game": NewGame(); break;
+			case "Load Game": LoadGame(); break;
 			case "Change Player": ChangePlayer(); break;
 			case "Quit Game": ExitGame(); break;
 			default: break;
@@ -51,5 +52,10 @@ public class MainMenu : Menu
 		GetComponent<MainMenu>().enabled = false;
 		GetComponent<SelectPlayerMenu>().enabled = true;
 		SelectionList.LoadEntries(PlayerManager.GetPlayerNames());
+	}
+
+	protected override void HideCurrentMenu()
+	{
+		GetComponent<MainMenu>().enabled = false;
 	}
 }

@@ -82,4 +82,20 @@ public class Menu : MonoBehaviour
 	{
 		Application.Quit();
 	}
+
+	protected void LoadGame()
+	{
+		HideCurrentMenu();
+		LoadMenu loadMenu = GetComponent<LoadMenu>();
+		if (loadMenu)
+		{
+			loadMenu.enabled = true;
+			loadMenu.Activate();
+		}
+	}
+
+	protected virtual void HideCurrentMenu()
+	{
+		//a child class needs to set this to hide itself when appropriate
+	}
 }
