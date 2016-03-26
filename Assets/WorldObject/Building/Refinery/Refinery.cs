@@ -14,4 +14,9 @@ public class Refinery : Building
 		base.PerformAction(actionToPerform);
 		CreateUnit(actionToPerform);
 	}
+
+	protected override bool ShouldMakeDecision()
+	{
+		return false;
+	}
 }

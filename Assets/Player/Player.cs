@@ -118,6 +118,7 @@ public class Player : MonoBehaviour
 			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
 			tempBuilding.SetColliders(false);
 			tempBuilding.SetPlayingArea(playingArea);
+			tempBuilding.hitPoints = 0;
 		}
 		else Destroy(newBuilding);
 	}

@@ -15,6 +15,7 @@ public class WorldObject : MonoBehaviour
 	public float weaponAimSpeed = 1.0f;
 	public AudioClip attackSound, selectSound, useWeaponSound;
 	public float attackVolume = 1.0f, selectVolume = 1.0f, useWeaponVolume = 1.0f;
+	public float detectionRange = 20.0f;
 
 	protected AudioElement audioElement;
 	protected Player player;
@@ -29,10 +30,14 @@ public class WorldObject : MonoBehaviour
 	protected bool movingIntoPosition = false;
 	protected bool aiming = false;
 	protected bool loadedSavedValues = false;
+	protected List<WorldObject> nearbyObjects;
 
 	private float currentWeaponChargeTime;
 	private List<Material> oldMaterials = new List<Material>();
 	private int loadedTargetId = -1;
+	//we want to restrict how many decisions are made to help with game performance
+	//the default time at the moment is a tenth of a second
+	private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
 
 	public int ObjectId { get; set; }
 
@@ -60,6 +65,7 @@ public class WorldObject : MonoBehaviour
 
 	protected virtual void Update()
 	{
+		if (ShouldMakeDecision()) DecideWhatToDo();
 		currentWeaponChargeTime += Time.deltaTime;
 		if (attacking && !movingIntoPosition && !aiming) PerformAttack();
 	}
@@ -430,5 +436,50 @@ public class WorldObject : MonoBehaviour
 		sounds.Add(useWeaponSound);
 		volumes.Add(useWeaponVolume);
 		audioElement = new AudioElement(sounds, volumes, objectName + ObjectId, this.transform);
+	}
+
+	/**
+	 * A child class should only determine other conditions under which a decision should
+	 * not be made. This could be 'harvesting' for a harvester, for example. Alternatively,
+	 * an object that never has to make decisions could just return false.
+	 */
+	protected virtual bool ShouldMakeDecision()
+	{
+		if (!attacking && !movingIntoPosition && !aiming)
+		{
+			//we are not doing anything at the moment
+			if (timeSinceLastDecision > timeBetweenDecisions)
+			{
+				timeSinceLastDecision = 0.0f;
+				return true;
+			}
+			timeSinceLastDecision += Time.deltaTime;
+		}
+		return false;
+	}
+
+	protected virtual void DecideWhatToDo()
+	{
+		//determine what should be done by the world object at the current point in time
+		Vector3 currentPosition = transform.position;
+		nearbyObjects = WorkManager.FindNearbyObjects(currentPosition, detectionRange);
+
+		if (CanAttack())
+		{
+			List<WorldObject> enemyObjects = new List<WorldObject>();
+			foreach (WorldObject nearbyObject in nearbyObjects)
+			{
+				Resource resource = nearbyObject.GetComponent<Resource>();
+				if (resource) continue;
+				if (nearbyObject.GetPlayer() != player) enemyObjects.Add(nearbyObject);
+			}
+			WorldObject closestObject = WorkManager.FindNearestWorldObjectInListToPosition(enemyObjects, currentPosition);
+			if (closestObject) BeginAttack(closestObject);
+		}
+	}
+
+	public Player GetPlayer()
+	{
+		return player;
 	}
 }

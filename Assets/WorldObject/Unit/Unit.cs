@@ -214,4 +214,10 @@ public class Unit : WorldObject
 		volumes.Add(moveVolume);
 		audioElement.Add(sounds, volumes);
 	}
+
+	protected override bool ShouldMakeDecision()
+	{
+		if (moving || rotating) return false;
+		return base.ShouldMakeDecision();
+	}
 }

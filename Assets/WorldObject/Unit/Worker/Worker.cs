@@ -19,7 +19,7 @@ public class Worker : Unit
 	protected override void Start()
 	{
 		base.Start();
-		actions = new string[] { "Refinery", "WarFactory", "Wonder" };
+		actions = new string[] { "Refinery", "WarFactory", "Turrent", "Wonder" };
 		if (player && loadedSavedValues && loadedProjectId >= 0)
 		{
 			WorldObject obj = player.GetObjectForId(loadedProjectId);
@@ -128,5 +128,29 @@ public class Worker : Unit
 		sounds.Add(finishedJobSound);
 		volumes.Add(finishedJobVolume);
 		audioElement.Add(sounds, volumes);
+	}
+
+	protected override bool ShouldMakeDecision()
+	{
+		if (building) return false;
+		return base.ShouldMakeDecision();
+	}
+
+	protected override void DecideWhatToDo()
+	{
+		base.DecideWhatToDo();
+		List<WorldObject> buildings = new List<WorldObject>();
+		foreach (WorldObject nearbyObject in nearbyObjects)
+		{
+			if (nearbyObject.GetPlayer() != player) continue;
+			Building nearbyBuilding = nearbyObject.GetComponent<Building>();
+			if (nearbyBuilding && nearbyBuilding.UnderConstruction()) buildings.Add(nearbyObject);
+		}
+		WorldObject nearestObject = WorkManager.FindNearestWorldObjectInListToPosition(buildings, transform.position);
+		if (nearestObject)
+		{
+			Building closestBuilding = nearestObject.GetComponent<Building>();
+			if (closestBuilding) SetBuilding(closestBuilding);
+		}
 	}
 }
