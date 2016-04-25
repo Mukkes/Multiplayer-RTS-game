@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AudioElement" Collapsed="true">
+    <Position X="14" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIgAAAAAAAAAAAAAAAAAAAIAAQAAAAAoACAAAAAAAA=</HashCode>
+      <FileName>Assets\Audio\AudioElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ConfirmDialog" Collapsed="true">
+    <Position X="17.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gABFAAAAACEACAAAAAABggEAAAAUAAAAMBCABAAiAAA=</HashCode>
+      <FileName>Assets\Menu\Scripts\ConfirmDialog.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LoadMenu" Collapsed="true">
+    <Position X="19.25" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgQEAAAQACEAAAhABBAAgAAAQAAAAAACAACAAAAAAAA=</HashCode>
+      <FileName>Assets\Menu\Scripts\LoadMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MainMenu" Collapsed="true">
+    <Position X="6.25" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAAAAABAIIABAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Menu\Scripts\MainMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Menu" Collapsed="true">
+    <Position X="7.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAQAACEAEAAAJAAQoIAAAAAACAACAACAAAAAAAE=</HashCode>
+      <FileName>Assets\Menu\Scripts\Menu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PauseMenu" Collapsed="true">
+    <Position X="8.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQQAAAAACAQAAAAEAAAAIAAAAAACAABAAAAAAgAAAA=</HashCode>
+      <FileName>Assets\Menu\Scripts\PauseMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResultsScreen" Collapsed="true">
+    <Position X="19.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgEAAAAACEAAIAABAAAgAAAAAAAAAAABICAAAAAAAA=</HashCode>
+      <FileName>Assets\Menu\Scripts\ResultsScreen.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SaveMenu" Collapsed="true">
+    <Position X="12.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQEAAAQCCEQAABABAAQoAAAQAAAAAACAAKAABAAAEA=</HashCode>
+      <FileName>Assets\Menu\Scripts\SaveMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SelectPlayerMenu" Collapsed="true">
+    <Position X="15.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAQACEAAAAABAERgAAAQCAAABACAACAAAAAAAA=</HashCode>
+      <FileName>Assets\Menu\Scripts\SelectPlayerMenu.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HUD" Collapsed="true">
+    <Position X="14" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ICAGACRKuCGAICCKxBEogoVRFgFcgQoBCBGKABwkAgE=</HashCode>
+      <FileName>Assets\Player\HUD\HUD.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Player" Collapsed="true">
+    <Position X="12.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>pAQJCAgAAGoAILAAABAIEAmAEQiiAAAABBIgAAQAAUA=</HashCode>
+      <FileName>Assets\Player\Player.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RallyPoint" Collapsed="true">
+    <Position X="15.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAAAAACAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Assets\Player\RallyPoint\RallyPoint.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UserInput" Collapsed="true">
+    <Position X="12.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQCAQAAACAAAAIAAAAAKAAAAAAAAAABAAAAIAgAAAA=</HashCode>
+      <FileName>Assets\Player\UserInput.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameManager" Collapsed="true">
+    <Position X="19.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAgAABAAAAAAAAAAAAIABAACAAAAAQAAAAAAAEA=</HashCode>
+      <FileName>Assets\Resources\GameManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameObjectList" Collapsed="true">
+    <Position X="21" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAIAgSAAAAAAAAAAAAAABCAQEgABAAACAAAAgEA=</HashCode>
+      <FileName>Assets\Resources\GameObjectList.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Ground" Collapsed="true">
+    <Position X="12.25" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Resources\Ground.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LevelLoader" Collapsed="true">
+    <Position X="15.75" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAABAAAAEAAAAAAAIABAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>Assets\Resources\LevelLoader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Sun" Collapsed="true">
+    <Position X="17.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Resources\Sun.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SelectionList" Collapsed="true">
+    <Position X="14" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAZACAAAAAAAAoAAAAAEAEAAAQABCAAAAAAIAAQQAUA=</HashCode>
+      <FileName>Assets\SelectionList\SelectionList.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AccumulateMoney" Collapsed="true">
+    <Position X="0.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAABgAAAAAAAAAQAAAA=</HashCode>
+      <FileName>Assets\VictoryConditions\AccumulateMoney.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BuildWonder" Collapsed="true">
+    <Position X="2.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
+      <FileName>Assets\VictoryConditions\BuildWonder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Conquest" Collapsed="true">
+    <Position X="5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAIQAAAA=</HashCode>
+      <FileName>Assets\VictoryConditions\Conquest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EscortConvoy" Collapsed="true">
+    <Position X="7.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAIAAAAAAAAAAAAAABAABABAQAAAA=</HashCode>
+      <FileName>Assets\VictoryConditions\EscortConvoy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Survival" Collapsed="true">
+    <Position X="9.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAABAAAAAIAAAAAAAAAAAAAAAAAQAAIQAAEA=</HashCode>
+      <FileName>Assets\VictoryConditions\Survival.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VictoryCondition" Collapsed="true">
+    <Position X="5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAIAAIAAAAAAAAAIAAAAAIAAAAIQAAAA=</HashCode>
+      <FileName>Assets\VictoryConditions\VictoryCondition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Building" Collapsed="true">
+    <Position X="4.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAJQAAAGgChAIDQAQBAAAQKQASBAQQAACAAAAAAkA=</HashCode>
+      <FileName>Assets\WorldObject\Building\Building.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Buildings" Collapsed="true">
+    <Position X="15.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Building\Buildings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Refinery" Collapsed="true">
+    <Position X="1.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAICIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Building\Refinery\Refinery.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Turret" Collapsed="true">
+    <Position X="3.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAIAAAAAACAAAIAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Assets\WorldObject\Building\Turret\Turret.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TurretProjectile" Collapsed="true">
+    <Position X="2.75" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Building\Turret\TurretProjectile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WarFactory" Collapsed="true">
+    <Position X="5.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAICIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Building\WarFactory\WarFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Wonder" Collapsed="true">
+    <Position X="8" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Building\Wonder\Wonder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Projectile" Collapsed="true">
+    <Position X="1.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgQAAACIAAAAgAAAIAAAAAAAAAAAAIAAAAQAAAAAAAI=</HashCode>
+      <FileName>Assets\WorldObject\Projectile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Ore" Collapsed="true">
+    <Position X="21" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Resource\OreDeposit\Ore.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OreDeposit" Collapsed="true">
+    <Position X="19.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Resource\OreDeposit\OreDeposit.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Resource" Collapsed="true">
+    <Position X="19.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAICgAAABAAAIABAAAAAAAAAAAAAAAQAAAQiA=</HashCode>
+      <FileName>Assets\WorldObject\Resource\Resource.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TeamColor" Collapsed="true">
+    <Position X="19.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\TeamColor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ConvoyTruck" Collapsed="true">
+    <Position X="14.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Unit\ConvoyTruck\ConvoyTruck.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Arms" Collapsed="true">
+    <Position X="12.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Harvester\Arms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Harvester" Collapsed="true">
+    <Position X="17" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>JAQAFAQAISgABkMIAAMABAAwAIAQAAAEEAAAAQBIBkI=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Harvester\Harvester.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tank" Collapsed="true">
+    <Position X="10.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACgAAAAAIAAAAAACAAAIAAAAAAAAAAAAIgA=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Tank\Tank.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TankProjectile" Collapsed="true">
+    <Position X="0.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Tank\TankProjectile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Unit" Collapsed="true">
+    <Position X="13.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQ0BABAMCgADAAAAAAAAAAAAAAQAgAAEACCBAIEAkE=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Unit.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Units" Collapsed="true">
+    <Position X="21" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Units.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Worker" Collapsed="true">
+    <Position X="12.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAQABAAAICsAAAACAAAAAAAACQAQAAQAEAAQAAQEAgA=</HashCode>
+      <FileName>Assets\WorldObject\Unit\Worker\Worker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WorldObject" Collapsed="true">
+    <Position X="10.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>VIRSBCGBIWslDHAEqAVEAAICgEAaQKABCAWArQFU02A=</HashCode>
+      <FileName>Assets\WorldObject\WorldObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RTS.LoadManager" Collapsed="true">
+    <Position X="17.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAACAAAQUAAAAAlAAAAAAAAgAAQAAAAAAAE=</HashCode>
+      <FileName>Assets\RTS\LoadManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RTS.PlayerManager" Collapsed="true">
+    <Position X="14" Y="7" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="RTS.PlayerManager.PlayerDetails" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\RTS\PlayerManager.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAgIAgQAAAAAAAAgAEAQBAACAAABCAIBAAAIAAQAA=</HashCode>
+      <FileName>Assets\RTS\PlayerManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RTS.ResourceManager" Collapsed="true">
+    <Position X="17.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEBCIQIAwYEMwBIFJGAQBgBBAAIAEhAMKMYICAACgiA=</HashCode>
+      <FileName>Assets\RTS\ResourceManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RTS.SaveManager" Collapsed="true">
+    <Position X="21" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABQAAABgAAYAAAAIgAAEACAACBDAAIAIAACAAAAAAE=</HashCode>
+      <FileName>Assets\RTS\SaveManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RTS.WorkManager" Collapsed="true">
+    <Position X="14" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgQAAAAAAAAAAEAAIAAAAAAAAAAAAQAAAQAAABAA=</HashCode>
+      <FileName>Assets\RTS\WorkManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="RTS.CursorState" Collapsed="true">
+    <Position X="12.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEIAQAAAAAEAAABAAQIAAAAAAABAAQAAAAAA=</HashCode>
+      <FileName>Assets\RTS\Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="RTS.ResourceType" Collapsed="true">
+    <Position X="14" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAhAAAAAAAAABA=</HashCode>
+      <FileName>Assets\RTS\Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using RTS;
 using UnityEngine.SceneManagement;
 
 public class MainMenu : Menu
 {
-
 	protected override void SetButtons()
 	{
-		buttons = new string[] { "New Game", "Load Game", "Change Player", "Quit Game" };
+		buttons = new string[] { "New Game", "Multiplayer", "Load Game", "Change Player", "Quit Game" };
 	}
 
 	protected override void HandleButton(string text)
@@ -17,6 +17,7 @@ public class MainMenu : Menu
 		switch (text)
 		{
 			case "New Game": NewGame(); break;
+			case "Multiplayer": Multiplayer(); break;
 			case "Load Game": LoadGame(); break;
 			case "Change Player": ChangePlayer(); break;
 			case "Quit Game": ExitGame(); break;
@@ -30,6 +31,12 @@ public class MainMenu : Menu
 		SceneManager.LoadScene("Map");
 		//makes sure that the loaded level runs at normal speed
 		Time.timeScale = 1.0f;
+	}
+
+	private void Multiplayer()
+	{
+		GetComponent<MainMenu>().enabled = false;
+		GetComponent<MultiplayerMenu>().enabled = true;
 	}
 
 	void OnLevelWasLoaded()
