@@ -42,9 +42,4 @@ public class MultiplayerMenu : Menu
 		GetComponent<MultiplayerMenu>().enabled = false;
 		GetComponent<MainMenu>().enabled = true;
 	}
-
-	private NetworkManager GetNetworkManager()
-	{
-		return GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
-	}
 }

@@ -47,6 +47,7 @@ public class PauseMenu : Menu
 
 	private void ReturnToMainMenu()
 	{
+		StopNetworkGame();
 		ResourceManager.LevelName = "";
 		SceneManager.LoadScene("MainMenu");
 		Cursor.visible = true;
