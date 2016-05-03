@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using RTS;
 using Newtonsoft.Json;
+using UnityEngine.Networking;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
 	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
 	public string username;
@@ -87,6 +88,7 @@ public class Player : MonoBehaviour
 	{
 		Units units = GetComponentInChildren<Units>();
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
+		NetworkServer.Spawn(newUnit);
 		newUnit.transform.parent = units.transform;
 	}
 
@@ -94,6 +96,7 @@ public class Player : MonoBehaviour
 	{
 		Units units = GetComponentInChildren<Units>();
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
+		NetworkServer.Spawn(newUnit);
 		newUnit.transform.parent = units.transform;
 		Unit unitObject = newUnit.GetComponent<Unit>();
 		if (unitObject && spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);

@@ -3,8 +3,9 @@ using System.Collections;
 using RTS;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using UnityEngine.Networking;
 
-public class WorldObject : MonoBehaviour
+public class WorldObject : NetworkBehaviour
 {
 
 	public string objectName;
