@@ -16,7 +16,7 @@ public class UserInput : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		if (player.human)
+		if (player.human && player.isLocalPlayer)
 		{
 			if (Input.GetKeyDown(KeyCode.Escape)) OpenPauseMenu();
 			MoveCamera();

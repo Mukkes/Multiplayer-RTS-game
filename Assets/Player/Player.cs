@@ -37,12 +37,19 @@ public class Player : NetworkBehaviour
 		hud = GetComponentInChildren<HUD>();
 		AddStartResourceLimits();
 		AddStartResources();
+		teamColor = TeamColorManager.GetUniqueColor();
+
+		if (human && isLocalPlayer)
+		{
+			string unitName = "Worker";
+			AddUnit(unitName, Vector3.zero, default(Quaternion));
+		}
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		if (human)
+		if (human && isLocalPlayer)
 		{
 			hud.SetResourceValues(resources, resourceLimits);
 			if (findingPlacement)
@@ -84,21 +91,19 @@ public class Player : NetworkBehaviour
 		resourceLimits[type] += amount;
 	}
 
-	public void AddUnit(string unitName, Vector3 spawnPoint, Quaternion rotation)
+	public Unit AddUnit(string unitName, Vector3 spawnPoint, Quaternion rotation)
 	{
-		Units units = GetComponentInChildren<Units>();
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
 		NetworkServer.Spawn(newUnit);
-		newUnit.transform.parent = units.transform;
+		Unit unitObject = newUnit.GetComponent<Unit>();
+		unitObject.SetPlayer(this);
+		unitObject.SetTeamColor();
+		return unitObject;
 	}
 
 	public void AddUnit(string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation, Building creator)
 	{
-		Units units = GetComponentInChildren<Units>();
-		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-		NetworkServer.Spawn(newUnit);
-		newUnit.transform.parent = units.transform;
-		Unit unitObject = newUnit.GetComponent<Unit>();
+		Unit unitObject = AddUnit(unitName, spawnPoint, rotation);
 		if (unitObject && spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);
 
 		if (unitObject)
@@ -178,9 +183,7 @@ public class Player : NetworkBehaviour
 	public void StartConstruction()
 	{
 		findingPlacement = false;
-		Buildings buildings = GetComponentInChildren<Buildings>();
-		if (buildings) tempBuilding.transform.parent = buildings.transform;
-		tempBuilding.SetPlayer();
+		tempBuilding.SetPlayer(this);
 		tempBuilding.SetColliders(true);
 		tempCreator.SetBuilding(tempBuilding);
 		tempBuilding.StartConstruction();
@@ -281,7 +284,6 @@ public class Player : NetworkBehaviour
 	private void LoadBuildings(JsonTextReader reader)
 	{
 		if (reader == null) return;
-		Buildings buildings = GetComponentInChildren<Buildings>();
 		string currValue = "", type = "";
 		while (reader.Read())
 		{
@@ -294,8 +296,7 @@ public class Player : NetworkBehaviour
 					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetBuilding(type));
 					Building building = newObject.GetComponent<Building>();
 					building.LoadDetails(reader);
-					building.transform.parent = buildings.transform;
-					building.SetPlayer();
+					building.SetPlayer(this);
 					building.SetTeamColor();
 					if (building.UnderConstruction())
 					{
@@ -310,7 +311,6 @@ public class Player : NetworkBehaviour
 	private void LoadUnits(JsonTextReader reader)
 	{
 		if (reader == null) return;
-		Units units = GetComponentInChildren<Units>();
 		string currValue = "", type = "";
 		while (reader.Read())
 		{
@@ -323,8 +323,7 @@ public class Player : NetworkBehaviour
 					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetUnit(type));
 					Unit unit = newObject.GetComponent<Unit>();
 					unit.LoadDetails(reader);
-					unit.transform.parent = units.transform;
-					unit.SetPlayer();
+					unit.SetPlayer(this);
 					unit.SetTeamColor();
 				}
 			}

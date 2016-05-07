@@ -11,6 +11,7 @@ public class WorldObject : NetworkBehaviour
 	public string objectName;
 	public Texture2D buildImage;
 	public int cost, sellValue, hitPoints, maxHitPoints;
+	public Player player;
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 1.0f;
@@ -19,7 +20,6 @@ public class WorldObject : NetworkBehaviour
 	public float detectionRange = 20.0f;
 
 	protected AudioElement audioElement;
-	protected Player player;
 	protected string[] actions = { };
 	protected bool currentlySelected = false;
 	protected Bounds selectionBounds;
@@ -50,7 +50,6 @@ public class WorldObject : NetworkBehaviour
 
 	protected virtual void Start()
 	{
-		SetPlayer();
 		if (player)
 		{
 			if (loadedSavedValues)
@@ -110,7 +109,7 @@ public class WorldObject : NetworkBehaviour
 				Player owner = hitObject.transform.root.GetComponent<Player>();
 				if (owner)
 				{ //the object is controlled by a player
-					if (player && player.human)
+					if (player && player.human && player.isLocalPlayer)
 					{ //this object is controlled by a human player
 					  //start attack if object is not owned by the same player and this object can attack, else select
 						if (player.username != owner.username && CanAttack()) BeginAttack(worldObject);
@@ -176,7 +175,7 @@ public class WorldObject : NetworkBehaviour
 	public virtual void SetHoverState(GameObject hoverObject)
 	{
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			//something other than the ground is being hovered over
 			if (!WorkManager.ObjectIsGround(hoverObject))
@@ -246,9 +245,9 @@ public class WorldObject : NetworkBehaviour
 		this.playingArea = playingArea;
 	}
 
-	public void SetPlayer()
+	public void SetPlayer(Player player)
 	{
-		player = transform.root.GetComponentInChildren<Player>();
+		this.player = player;
 	}
 
 	public virtual bool CanAttack()

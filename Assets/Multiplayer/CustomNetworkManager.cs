@@ -16,7 +16,7 @@ public class CustomNetworkManager : NetworkManager {
 	{
 		Debug.Log("Spawn new player.");
 		var player = (GameObject)Instantiate(playerPrefab, new Vector3(), Quaternion.identity);
-		SpawnWorker(player.GetComponent<Player>());
+		//SpawnWorker(player.GetComponent<Player>());
 		NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
 	}
 }
