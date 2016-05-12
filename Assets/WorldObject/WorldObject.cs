@@ -5,19 +5,25 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 
-public class WorldObject : NetworkBehaviour
+public abstract class WorldObject : NetworkBehaviour
 {
 
 	public string objectName;
 	public Texture2D buildImage;
 	public int cost, sellValue, hitPoints, maxHitPoints;
+	//public NetworkViewID playerId;
+	[SyncVar]
+	public int playerId = -1;
 	public Player player;
+	public GameObject playerObject;
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 1.0f;
 	public AudioClip attackSound, selectSound, useWeaponSound;
 	public float attackVolume = 1.0f, selectVolume = 1.0f, useWeaponVolume = 1.0f;
 	public float detectionRange = 20.0f;
+	// Check if network things has been done.
+	public bool handleNetwork = true;
 
 	protected AudioElement audioElement;
 	protected string[] actions = { };
@@ -50,24 +56,36 @@ public class WorldObject : NetworkBehaviour
 
 	protected virtual void Start()
 	{
-		if (player)
-		{
-			if (loadedSavedValues)
-			{
-				if (loadedTargetId >= 0) target = player.GetObjectForId(loadedTargetId);
-			}
-			else {
-				SetTeamColor();
-			}
-		}
+		if (handleNetwork)
+			HandleNetwork();
+		
 		InitialiseAudio();
 	}
 
 	protected virtual void Update()
 	{
+		if (handleNetwork)
+			HandleNetwork();
+
 		if (ShouldMakeDecision()) DecideWhatToDo();
 		currentWeaponChargeTime += Time.deltaTime;
 		if (attacking && !movingIntoPosition && !aiming) PerformAttack();
+
+		if (!isLocalPlayer)
+			CalculateBounds();
+	}
+
+	private void HandleNetwork()
+	{
+		if (playerId >= 0)
+		{
+			player = PlayerManager.FindPlayer(playerId);
+			if (player != null)
+			{
+				SetPlayer();
+				handleNetwork = false;
+			}
+		}
 	}
 
 	protected virtual void OnGUI()
@@ -245,10 +263,18 @@ public class WorldObject : NetworkBehaviour
 		this.playingArea = playingArea;
 	}
 
-	public void SetPlayer(Player player)
+	public void SetPlayerId(int id)
 	{
-		this.player = player;
+		playerId = id;
 	}
+
+	private void SetPlayer()
+	{
+		SetParent();
+		SetTeamColor();
+	}
+
+	public abstract void SetParent();
 
 	public virtual bool CanAttack()
 	{

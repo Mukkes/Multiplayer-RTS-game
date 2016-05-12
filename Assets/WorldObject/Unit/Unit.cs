@@ -220,4 +220,10 @@ public class Unit : WorldObject
 		if (moving || rotating) return false;
 		return base.ShouldMakeDecision();
 	}
+
+	public override void SetParent()
+	{
+		Units units = player.GetComponentInChildren<Units>();
+		transform.parent = units.transform;
+	}
 }

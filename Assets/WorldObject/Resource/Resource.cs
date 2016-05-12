@@ -66,4 +66,9 @@ public class Resource : WorldObject
 	{
 		return false;
 	}
+	
+	public override void SetParent()
+	{
+
+	}
 }

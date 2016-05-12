@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RTS;
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -24,16 +25,22 @@ public class MultiplayerMenu : Menu
 
 	private void LANHost()
 	{
+		ResourceManager.MenuOpen = false;
+		Time.timeScale = 1.0f;
 		GetNetworkManager().StartHost();
 	}
 
 	private void LANCient()
 	{
+		ResourceManager.MenuOpen = false;
+		Time.timeScale = 1.0f;
 		GetNetworkManager().StartClient();
 	}
 
 	private void LANServerOnly()
 	{
+		ResourceManager.MenuOpen = false;
+		Time.timeScale = 1.0f;
 		GetNetworkManager().StartServer();
 	}
 

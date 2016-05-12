@@ -4,19 +4,23 @@ using UnityEngine.Networking;
 using RTS;
 
 public class CustomNetworkManager : NetworkManager {
-
+	
 	private void SpawnWorker(Player player)
 	{
 		string unitName = "Worker";
+		Vector3 spawnPoint = PlayerManager.GetSpawnPoint(player.id);
 		
-		player.AddUnit(unitName, Vector3.zero, default(Quaternion));
+		player.CmdAddUnit(unitName, spawnPoint, default(Quaternion));
 	}
 
 	public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)
 	{
-		Debug.Log("Spawn new player.");
-		var player = (GameObject)Instantiate(playerPrefab, new Vector3(), Quaternion.identity);
-		//SpawnWorker(player.GetComponent<Player>());
-		NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
+		var playerObject = (GameObject)Instantiate(playerPrefab, new Vector3(), Quaternion.identity);
+		NetworkServer.AddPlayerForConnection(conn, playerObject, playerControllerId);
+		Player player = playerObject.GetComponent<Player>();
+		int playerId = PlayerManager.GetUniquePlayerId();
+		player.SetId(playerId);
+
+		SpawnWorker(player);
 	}
 }

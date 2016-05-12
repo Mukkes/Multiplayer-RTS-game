@@ -46,6 +46,17 @@ public class Building : WorldObject
 		if (needsBuilding) DrawBuildProgress();
 	}
 
+	private void DrawBuildProgress()
+	{
+		GUI.skin = ResourceManager.SelectBoxSkin;
+		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
+		//Draw the selection box around the currently selected object, within the bounds of the main draw area
+		GUI.BeginGroup(playingArea);
+		CalculateCurrentHealth(0.5f, 0.99f);
+		DrawHealthBar(selectBox, "Building ...");
+		GUI.EndGroup();
+	}
+
 	protected void CreateUnit(string unitName)
 	{
 		GameObject unit = ResourceManager.GetUnit(unitName);
@@ -69,6 +80,33 @@ public class Building : WorldObject
 				currentBuildProgress = 0.0f;
 			}
 		}
+	}
+
+	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
+	{
+		base.HandleLoadedProperty(reader, propertyName, readValue);
+		switch (propertyName)
+		{
+			case "NeedsBuilding": needsBuilding = (bool)readValue; break;
+			case "SpawnPoint": spawnPoint = LoadManager.LoadVector(reader); break;
+			case "RallyPoint": rallyPoint = LoadManager.LoadVector(reader); break;
+			case "BuildProgress": currentBuildProgress = (float)(double)readValue; break;
+			case "BuildQueue": buildQueue = new Queue<string>(LoadManager.LoadStringArray(reader)); break;
+			case "PlayingArea": playingArea = LoadManager.LoadRect(reader); break;
+			default: break;
+		}
+	}
+
+	protected override void InitialiseAudio()
+	{
+		base.InitialiseAudio();
+		if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
+		if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		sounds.Add(finishedJobSound);
+		volumes.Add(finishedJobVolume);
+		audioElement.Add(sounds, volumes);
 	}
 
 	public string[] getBuildQueueValues()
@@ -163,17 +201,6 @@ public class Building : WorldObject
 		hitPoints = 0;
 	}
 
-	private void DrawBuildProgress()
-	{
-		GUI.skin = ResourceManager.SelectBoxSkin;
-		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
-		//Draw the selection box around the currently selected object, within the bounds of the main draw area
-		GUI.BeginGroup(playingArea);
-		CalculateCurrentHealth(0.5f, 0.99f);
-		DrawHealthBar(selectBox, "Building ...");
-		GUI.EndGroup();
-	}
-
 	public bool UnderConstruction()
 	{
 		return needsBuilding;
@@ -202,30 +229,9 @@ public class Building : WorldObject
 		if (needsBuilding) SaveManager.WriteRect(writer, "PlayingArea", playingArea);
 	}
 
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
+	public override void SetParent()
 	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "NeedsBuilding": needsBuilding = (bool)readValue; break;
-			case "SpawnPoint": spawnPoint = LoadManager.LoadVector(reader); break;
-			case "RallyPoint": rallyPoint = LoadManager.LoadVector(reader); break;
-			case "BuildProgress": currentBuildProgress = (float)(double)readValue; break;
-			case "BuildQueue": buildQueue = new Queue<string>(LoadManager.LoadStringArray(reader)); break;
-			case "PlayingArea": playingArea = LoadManager.LoadRect(reader); break;
-			default: break;
-		}
-	}
-
-	protected override void InitialiseAudio()
-	{
-		base.InitialiseAudio();
-		if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
-		if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
-		List<AudioClip> sounds = new List<AudioClip>();
-		List<float> volumes = new List<float>();
-		sounds.Add(finishedJobSound);
-		volumes.Add(finishedJobVolume);
-		audioElement.Add(sounds, volumes);
+		Buildings buildings = player.GetComponentInChildren<Buildings>();
+		transform.parent = buildings.transform;
 	}
 }

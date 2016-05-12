@@ -196,5 +196,61 @@ namespace RTS
 			}
 			return savedGames;
 		}
+
+		private static Color[] colors =
+		{
+			Color.red,
+			Color.blue,
+			Color.green,
+			Color.yellow
+		};
+
+		public static Color GetTeamColor(int id)
+		{
+			Color color = Color.black;
+
+			if (id < colors.Length)
+				color = colors[id];
+
+			return color;
+		}
+
+		private static int uniquePlayerId = 0;
+
+		public static int GetUniquePlayerId()
+		{
+			int id = uniquePlayerId;
+			uniquePlayerId++;
+			return id;
+		}
+
+		public static Player FindPlayer(int id)
+		{
+			foreach (GameObject gameObject in Object.FindObjectsOfType(typeof(GameObject)) as GameObject[])
+			{
+				Player player = gameObject.GetComponent<Player>();
+				if ((player != null) && (player.id == id))
+					return player;
+			}
+			return null;
+		}
+
+		private static Vector3[] spawnPoints =
+		{
+			new Vector3(-10, 0, 0),
+			new Vector3(10, 0, 0),
+			new Vector3(0, 0, 10),
+			new Vector3(0, 0, -10)
+		};
+
+		public static Vector3 GetSpawnPoint(int id)
+		{
+			Vector3 spawnPoint = new Vector3();
+
+			if (id < spawnPoints.Length)
+				spawnPoint = spawnPoints[id];
+
+			return spawnPoint;
+		}
 	}
 }

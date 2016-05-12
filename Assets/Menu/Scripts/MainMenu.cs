@@ -8,7 +8,7 @@ public class MainMenu : Menu
 {
 	protected override void SetButtons()
 	{
-		buttons = new string[] { "New Game", "Multiplayer", "Load Game", "Change Player", "Quit Game" };
+		buttons = new string[] { "New Game", "Change Player", "Quit Game" };
 	}
 
 	protected override void HandleButton(string text)
@@ -16,21 +16,11 @@ public class MainMenu : Menu
 		base.HandleButton(text);
 		switch (text)
 		{
-			case "New Game": NewGame(); break;
-			case "Multiplayer": Multiplayer(); break;
-			case "Load Game": LoadGame(); break;
+			case "New Game": Multiplayer(); break;
 			case "Change Player": ChangePlayer(); break;
 			case "Quit Game": ExitGame(); break;
 			default: break;
 		}
-	}
-
-	private void NewGame()
-	{
-		ResourceManager.MenuOpen = false;
-		SceneManager.LoadScene("Map");
-		//makes sure that the loaded level runs at normal speed
-		Time.timeScale = 1.0f;
 	}
 
 	private void Multiplayer()

@@ -13,6 +13,10 @@ public class Player : NetworkBehaviour
 	public HUD hud;
 	public Material notAllowedMaterial, allowedMaterial;
 	public Color teamColor;
+	[SyncVar]
+	public int id = -1;
+	// Check if network things has been done.
+	public bool handleNetwork = true;
 
 	private Dictionary<ResourceType, int> resources, resourceLimits;
 	private Building tempBuilding;
@@ -34,21 +38,19 @@ public class Player : NetworkBehaviour
 	// Use this for initialization
 	void Start()
 	{
+		if (handleNetwork)
+			HandleNetwork();
 		hud = GetComponentInChildren<HUD>();
 		AddStartResourceLimits();
 		AddStartResources();
-		teamColor = TeamColorManager.GetUniqueColor();
-
-		if (human && isLocalPlayer)
-		{
-			string unitName = "Worker";
-			AddUnit(unitName, Vector3.zero, default(Quaternion));
-		}
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
+		if (handleNetwork)
+			HandleNetwork();
+
 		if (human && isLocalPlayer)
 		{
 			hud.SetResourceValues(resources, resourceLimits);
@@ -58,6 +60,15 @@ public class Player : NetworkBehaviour
 				if (CanPlaceBuilding()) tempBuilding.SetTransparentMaterial(allowedMaterial, false);
 				else tempBuilding.SetTransparentMaterial(notAllowedMaterial, false);
 			}
+		}
+	}
+
+	private void HandleNetwork()
+	{
+		if (id >= 0)
+		{
+			teamColor = PlayerManager.GetTeamColor(id);
+			handleNetwork = false;
 		}
 	}
 
@@ -81,6 +92,99 @@ public class Player : NetworkBehaviour
 		AddResource(ResourceType.Power, startPower);
 	}
 
+	private void LoadResources(JsonTextReader reader)
+	{
+		if (reader == null) return;
+		string currValue = "";
+		while (reader.Read())
+		{
+			if (reader.Value != null)
+			{
+				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
+				else {
+					switch (currValue)
+					{
+						case "Money": startMoney = (int)(System.Int64)reader.Value; break;
+						case "Money_Limit": startMoneyLimit = (int)(System.Int64)reader.Value; break;
+						case "Power": startPower = (int)(System.Int64)reader.Value; break;
+						case "Power_Limit": startPowerLimit = (int)(System.Int64)reader.Value; break;
+						default: break;
+					}
+				}
+			}
+			else if (reader.TokenType == JsonToken.EndArray)
+			{
+				return;
+			}
+		}
+	}
+
+	private void LoadBuildings(JsonTextReader reader)
+	{
+		if (reader == null) return;
+		Buildings buildings = GetComponentInChildren<Buildings>();
+		string currValue = "", type = "";
+		while (reader.Read())
+		{
+			if (reader.Value != null)
+			{
+				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
+				else if (currValue == "Type")
+				{
+					type = (string)reader.Value;
+					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetBuilding(type));
+					Building building = newObject.GetComponent<Building>();
+					building.transform.parent = buildings.transform;
+					//building.SetPlayer(-1);
+					building.SetTeamColor();
+					if (building.UnderConstruction())
+					{
+						building.SetTransparentMaterial(allowedMaterial, true);
+					}
+				}
+			}
+			else if (reader.TokenType == JsonToken.EndArray) return;
+		}
+	}
+
+	private void LoadUnits(JsonTextReader reader)
+	{
+		if (reader == null) return;
+		Units units = GetComponentInChildren<Units>();
+		string currValue = "", type = "";
+		while (reader.Read())
+		{
+			if (reader.Value != null)
+			{
+				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
+				else if (currValue == "Type")
+				{
+					type = (string)reader.Value;
+					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetUnit(type));
+					Unit unit = newObject.GetComponent<Unit>();
+					unit.LoadDetails(reader);
+					unit.transform.parent = units.transform;
+					//unit.SetPlayer(-1);
+					unit.SetTeamColor();
+				}
+			}
+			else if (reader.TokenType == JsonToken.EndArray) return;
+		}
+	}
+
+	//[Command]
+	/*[RPC]
+	private void CmdSpawnWorldObject(GameObject gameObject)
+	{
+		//NetworkServer.Spawn(gameObject);
+		NetworkServer.SpawnWithClientAuthority(gameObject, connectionToClient);
+	}*/
+
+	public void SetId(int id)
+	{
+		this.id = id;
+	}
+
 	public void AddResource(ResourceType type, int amount)
 	{
 		resources[type] += amount;
@@ -91,27 +195,33 @@ public class Player : NetworkBehaviour
 		resourceLimits[type] += amount;
 	}
 
-	public Unit AddUnit(string unitName, Vector3 spawnPoint, Quaternion rotation)
+	[Command]
+	public void CmdAddUnit(string unitName, Vector3 spawnPoint, Quaternion rotation)
 	{
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-		NetworkServer.Spawn(newUnit);
 		Unit unitObject = newUnit.GetComponent<Unit>();
-		unitObject.SetPlayer(this);
-		unitObject.SetTeamColor();
-		return unitObject;
+		if (unitObject)
+		{
+			unitObject.ObjectId = ResourceManager.GetNewObjectId();
+			unitObject.SetPlayerId(id);
+			//unitObject.SetPlayer(id);
+			//CmdSpawnWorldObject(newUnit);
+			NetworkServer.SpawnWithClientAuthority(newUnit, connectionToClient);
+		}
+		else Destroy(newUnit);
 	}
 
 	public void AddUnit(string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation, Building creator)
 	{
-		Unit unitObject = AddUnit(unitName, spawnPoint, rotation);
-		if (unitObject && spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);
-
+		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
+		Unit unitObject = newUnit.GetComponent<Unit>();
 		if (unitObject)
 		{
 			unitObject.SetBuilding(creator);
 			unitObject.ObjectId = ResourceManager.GetNewObjectId();
 			if (spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);
 		}
+		else Destroy(newUnit);
 	}
 
 	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
@@ -183,7 +293,7 @@ public class Player : NetworkBehaviour
 	public void StartConstruction()
 	{
 		findingPlacement = false;
-		tempBuilding.SetPlayer(this);
+		//tempBuilding.SetPlayer(-1);
 		tempBuilding.SetColliders(true);
 		tempCreator.SetBuilding(tempBuilding);
 		tempBuilding.StartConstruction();
@@ -254,82 +364,7 @@ public class Player : NetworkBehaviour
 		}
 	}
 
-	private void LoadResources(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		string currValue = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
-				else {
-					switch (currValue)
-					{
-						case "Money": startMoney = (int)(System.Int64)reader.Value; break;
-						case "Money_Limit": startMoneyLimit = (int)(System.Int64)reader.Value; break;
-						case "Power": startPower = (int)(System.Int64)reader.Value; break;
-						case "Power_Limit": startPowerLimit = (int)(System.Int64)reader.Value; break;
-						default: break;
-					}
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndArray)
-			{
-				return;
-			}
-		}
-	}
-
-	private void LoadBuildings(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		string currValue = "", type = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
-				else if (currValue == "Type")
-				{
-					type = (string)reader.Value;
-					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetBuilding(type));
-					Building building = newObject.GetComponent<Building>();
-					building.LoadDetails(reader);
-					building.SetPlayer(this);
-					building.SetTeamColor();
-					if (building.UnderConstruction())
-					{
-						building.SetTransparentMaterial(allowedMaterial, true);
-					}
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndArray) return;
-		}
-	}
-
-	private void LoadUnits(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		string currValue = "", type = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
-				else if (currValue == "Type")
-				{
-					type = (string)reader.Value;
-					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetUnit(type));
-					Unit unit = newObject.GetComponent<Unit>();
-					unit.LoadDetails(reader);
-					unit.SetPlayer(this);
-					unit.SetTeamColor();
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndArray) return;
-		}
-	}
+	
 
 	public bool IsDead()
 	{

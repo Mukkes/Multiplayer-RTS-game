@@ -98,17 +98,6 @@ public class Menu : MonoBehaviour
 		Application.Quit();
 	}
 
-	protected void LoadGame()
-	{
-		HideCurrentMenu();
-		LoadMenu loadMenu = GetComponent<LoadMenu>();
-		if (loadMenu)
-		{
-			loadMenu.enabled = true;
-			loadMenu.Activate();
-		}
-	}
-
 	protected NetworkManager GetNetworkManager()
 	{
 		return GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
