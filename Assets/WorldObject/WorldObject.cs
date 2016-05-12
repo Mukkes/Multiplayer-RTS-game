@@ -41,7 +41,7 @@ public abstract class WorldObject : NetworkBehaviour
 
 	private float currentWeaponChargeTime;
 	private List<Material> oldMaterials = new List<Material>();
-	private int loadedTargetId = -1;
+	//private int loadedTargetId = -1;
 	//we want to restrict how many decisions are made to help with game performance
 	//the default time at the moment is a tenth of a second
 	private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
@@ -440,7 +440,7 @@ public abstract class WorldObject : NetworkBehaviour
 			case "MovingIntoPosition": movingIntoPosition = (bool)readValue; break;
 			case "Aiming": aiming = (bool)readValue; break;
 			case "CurrentWeaponChargeTime": currentWeaponChargeTime = (float)(double)readValue; break;
-			case "TargetId": loadedTargetId = (int)(System.Int64)readValue; break;
+			//case "TargetId": loadedTargetId = (int)(System.Int64)readValue; break;
 			default: break;
 		}
 	}

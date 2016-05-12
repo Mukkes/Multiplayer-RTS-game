@@ -130,7 +130,7 @@ public class Building : WorldObject
 			RallyPoint flag = player.GetComponentInChildren<RallyPoint>();
 			if (selected)
 			{
-				if (flag && player.human && spawnPoint != ResourceManager.InvalidPosition && rallyPoint != ResourceManager.InvalidPosition)
+				if (flag && player.human && player.isLocalPlayer && spawnPoint != ResourceManager.InvalidPosition && rallyPoint != ResourceManager.InvalidPosition)
 				{
 					flag.transform.localPosition = rallyPoint;
 					flag.transform.forward = transform.forward;
@@ -138,7 +138,7 @@ public class Building : WorldObject
 				}
 			}
 			else {
-				if (flag && player.human) flag.Disable();
+				if (flag && player.human && player.isLocalPlayer) flag.Disable();
 			}
 		}
 	}
@@ -152,7 +152,7 @@ public class Building : WorldObject
 	{
 		base.SetHoverState(hoverObject);
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			if (WorkManager.ObjectIsGround(hoverObject))
 			{
@@ -165,7 +165,7 @@ public class Building : WorldObject
 	{
 		base.MouseClick(hitObject, hitPoint, controller);
 		//only handle iput if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			if (WorkManager.ObjectIsGround(hitObject))
 			{
@@ -180,7 +180,7 @@ public class Building : WorldObject
 	public void SetRallyPoint(Vector3 position)
 	{
 		rallyPoint = position;
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			RallyPoint flag = player.GetComponentInChildren<RallyPoint>();
 			if (flag) flag.transform.localPosition = rallyPoint;

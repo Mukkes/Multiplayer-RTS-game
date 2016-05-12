@@ -83,7 +83,7 @@ public class Worker : Unit
 	{
 		bool doBase = true;
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected && !WorkManager.ObjectIsGround(hitObject))
+		if (player && player.human && player.isLocalPlayer && currentlySelected && !WorkManager.ObjectIsGround(hitObject))
 		{
 			Building building = hitObject.transform.parent.GetComponent<Building>();
 			if (building)

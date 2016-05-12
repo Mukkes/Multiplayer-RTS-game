@@ -91,7 +91,7 @@ public class Harvester : Unit
 	{
 		base.SetHoverState(hoverObject);
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			if (!WorkManager.ObjectIsGround(hoverObject))
 			{
@@ -105,7 +105,7 @@ public class Harvester : Unit
 	{
 		base.MouseClick(hitObject, hitPoint, controller);
 		//only handle input if owned by a human player
-		if (player && player.human)
+		if (player && player.human && player.isLocalPlayer)
 		{
 			if (!WorkManager.ObjectIsGround(hitObject))
 			{

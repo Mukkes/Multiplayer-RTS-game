@@ -49,7 +49,7 @@ public class Unit : WorldObject
 	{
 		base.SetHoverState(hoverObject);
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			bool moveHover = false;
 			if (WorkManager.ObjectIsGround(hoverObject))
@@ -68,7 +68,7 @@ public class Unit : WorldObject
 	{
 		base.MouseClick(hitObject, hitPoint, controller);
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			bool clickedOnEmptyResource = false;
 			if (hitObject.transform.parent)
