@@ -7,7 +7,8 @@ public class HUD : MonoBehaviour
 {
 	private const int ORDERS_BAR_WIDTH = 150;
 	private const int RESOURCE_BAR_HEIGHT = 40;
-	private const int SELECTION_NAME_HEIGHT = 21;
+    private const int ORDERS_BAR_HEIGHT = 60;
+    private const int SELECTION_NAME_HEIGHT = 21;
 	private const int ICON_WIDTH = 32, ICON_HEIGHT = 32, TEXT_WIDTH = 128, TEXT_HEIGHT = 32;
 	private const int BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64;
 	private const int BUTTON_SPACING = 7;
@@ -104,8 +105,8 @@ public class HUD : MonoBehaviour
 	private void DrawOrdersBar()
 	{
 		GUI.skin = ordersSkin;
-		GUI.BeginGroup(new Rect(Screen.width - ORDERS_BAR_WIDTH - BUILD_IMAGE_WIDTH, RESOURCE_BAR_HEIGHT, ORDERS_BAR_WIDTH + BUILD_IMAGE_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT));
-		GUI.Box(new Rect(BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH, 0, ORDERS_BAR_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT), "");
+		GUI.BeginGroup(new Rect(0  , 0 + Screen.height - ORDERS_BAR_HEIGHT, Screen.width, 150));
+		GUI.Box(new Rect(0, 0, Screen.width, Screen.height ), "");
 
 		string selectionName = "";
 		if (player.SelectedObject)
