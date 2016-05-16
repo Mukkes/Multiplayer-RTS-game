@@ -107,7 +107,9 @@ public class HUD : MonoBehaviour
 		GUI.skin = ordersSkin;
 		GUI.BeginGroup(new Rect(0  , 0 + Screen.height - ORDERS_BAR_HEIGHT, Screen.width, 150));
 		GUI.Box(new Rect(0, 0, Screen.width, Screen.height ), "");
-
+        // de construction que moet nog omhoog ipv naar benede
+        // er hoeft geen skin achter, ik wil alleen button, misschien kan dit met ui components ipv dit.
+        //
 		string selectionName = "";
 		if (player.SelectedObject)
 		{
@@ -133,6 +135,7 @@ public class HUD : MonoBehaviour
 		{
 			int leftPos = BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH / 2;
 			int topPos = buildAreaHeight + BUTTON_SPACING;
+            //de label klopt neit meer ik zien geen tekst nu 
 			GUI.Label(new Rect(leftPos, topPos, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT), selectionName);
 		}
 
