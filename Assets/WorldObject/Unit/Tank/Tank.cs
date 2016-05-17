@@ -51,20 +51,4 @@ public class Tank : Unit {
 		projectile.SetRange(0.9f * weaponRange);
 		projectile.SetTarget(target);
 	}
-
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteQuaternion(writer, "AimRotation", aimRotation);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "AimRotation": aimRotation = LoadManager.LoadQuaternion(reader); break;
-			default: break;
-		}
-	}
 }

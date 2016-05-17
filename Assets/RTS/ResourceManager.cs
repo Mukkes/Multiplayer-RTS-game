@@ -103,13 +103,6 @@ namespace RTS
 
 		public static string LevelName { get; set; }
 
-		public static int GetNewObjectId()
-		{
-			LevelLoader loader = (LevelLoader)Object.FindObjectOfType(typeof(LevelLoader));
-			if (loader) return loader.GetNewObjectId();
-			return -1;
-		}
-
 		public static Texture2D[] GetAvatars()
 		{
 			return gameObjectList.GetAvatars();

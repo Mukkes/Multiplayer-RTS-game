@@ -13,6 +13,8 @@ public abstract class WorldObject : NetworkBehaviour
 	public int cost, sellValue, hitPoints, maxHitPoints;
 	//public NetworkViewID playerId;
 	[SyncVar]
+	public int id = -1;
+	[SyncVar]
 	public int playerId = -1;
 	public Player player;
 	public GameObject playerObject;
@@ -24,7 +26,7 @@ public abstract class WorldObject : NetworkBehaviour
 	public float detectionRange = 20.0f;
 	// Check if network things has been done.
 	public bool handleNetwork = true;
-
+	
 	protected AudioElement audioElement;
 	protected string[] actions = { };
 	protected bool currentlySelected = false;
@@ -36,17 +38,13 @@ public abstract class WorldObject : NetworkBehaviour
 	protected bool attacking = false;
 	protected bool movingIntoPosition = false;
 	protected bool aiming = false;
-	protected bool loadedSavedValues = false;
 	protected List<WorldObject> nearbyObjects;
 
 	private float currentWeaponChargeTime;
 	private List<Material> oldMaterials = new List<Material>();
-	//private int loadedTargetId = -1;
 	//we want to restrict how many decisions are made to help with game performance
 	//the default time at the moment is a tenth of a second
 	private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
-
-	public int ObjectId { get; set; }
 
 	protected virtual void Awake()
 	{
@@ -75,7 +73,7 @@ public abstract class WorldObject : NetworkBehaviour
 			CalculateBounds();
 	}
 
-	private void HandleNetwork()
+	protected virtual void HandleNetwork()
 	{
 		if (playerId >= 0)
 		{
@@ -91,6 +89,11 @@ public abstract class WorldObject : NetworkBehaviour
 	protected virtual void OnGUI()
 	{
 		if (currentlySelected && !ResourceManager.MenuOpen) DrawSelection();
+	}
+
+	public void SetId(int id)
+	{
+		this.id = id;
 	}
 
 	public virtual void SetSelection(bool selected, Rect playingArea)
@@ -268,7 +271,7 @@ public abstract class WorldObject : NetworkBehaviour
 		playerId = id;
 	}
 
-	private void SetPlayer()
+	protected void SetPlayer()
 	{
 		SetParent();
 		SetTeamColor();
@@ -378,73 +381,6 @@ public abstract class WorldObject : NetworkBehaviour
 		if (hitPoints <= 0) Destroy(gameObject);
 	}
 
-	public virtual void SaveDetails(JsonWriter writer)
-	{
-		SaveManager.WriteString(writer, "Type", name);
-		SaveManager.WriteString(writer, "Name", objectName);
-		SaveManager.WriteInt(writer, "Id", ObjectId);
-		SaveManager.WriteVector(writer, "Position", transform.position);
-		SaveManager.WriteQuaternion(writer, "Rotation", transform.rotation);
-		SaveManager.WriteVector(writer, "Scale", transform.localScale);
-		SaveManager.WriteInt(writer, "HitPoints", hitPoints);
-		SaveManager.WriteBoolean(writer, "Attacking", attacking);
-		SaveManager.WriteBoolean(writer, "MovingIntoPosition", movingIntoPosition);
-		SaveManager.WriteBoolean(writer, "Aiming", aiming);
-		if (attacking)
-		{
-			//only save if attacking so that we do not end up storing massive numbers for no reason
-			SaveManager.WriteFloat(writer, "CurrentWeaponChargeTime", currentWeaponChargeTime);
-		}
-		if (target != null) SaveManager.WriteInt(writer, "TargetId", target.ObjectId);
-	}
-
-	public void LoadDetails(JsonTextReader reader)
-	{
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName)
-				{
-					string propertyName = (string)reader.Value;
-					reader.Read();
-					HandleLoadedProperty(reader, propertyName, reader.Value);
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndObject)
-			{
-				//loaded position invalidates the selection bounds so they must be recalculated
-				selectionBounds = ResourceManager.InvalidBounds;
-				CalculateBounds();
-				loadedSavedValues = true;
-				return;
-			}
-		}
-		//loaded position invalidates the selection bounds so they must be recalculated
-		selectionBounds = ResourceManager.InvalidBounds;
-		CalculateBounds();
-		loadedSavedValues = true;
-	}
-
-	protected virtual void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		switch (propertyName)
-		{
-			case "Name": objectName = (string)readValue; break;
-			case "Id": ObjectId = (int)(System.Int64)readValue; break;
-			case "Position": transform.localPosition = LoadManager.LoadVector(reader); break;
-			case "Rotation": transform.localRotation = LoadManager.LoadQuaternion(reader); break;
-			case "Scale": transform.localScale = LoadManager.LoadVector(reader); break;
-			case "HitPoints": hitPoints = (int)(System.Int64)readValue; break;
-			case "Attacking": attacking = (bool)readValue; break;
-			case "MovingIntoPosition": movingIntoPosition = (bool)readValue; break;
-			case "Aiming": aiming = (bool)readValue; break;
-			case "CurrentWeaponChargeTime": currentWeaponChargeTime = (float)(double)readValue; break;
-			//case "TargetId": loadedTargetId = (int)(System.Int64)readValue; break;
-			default: break;
-		}
-	}
-
 	protected virtual void InitialiseAudio()
 	{
 		List<AudioClip> sounds = new List<AudioClip>();
@@ -461,7 +397,7 @@ public abstract class WorldObject : NetworkBehaviour
 		if (useWeaponVolume > 1.0f) useWeaponVolume = 1.0f;
 		sounds.Add(useWeaponSound);
 		volumes.Add(useWeaponVolume);
-		audioElement = new AudioElement(sounds, volumes, objectName + ObjectId, this.transform);
+		audioElement = new AudioElement(sounds, volumes, objectName, this.transform);
 	}
 
 	/**

@@ -9,8 +9,9 @@ public class CustomNetworkManager : NetworkManager {
 	{
 		string unitName = "Worker";
 		Vector3 spawnPoint = PlayerManager.GetSpawnPoint(player.id);
+		int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
 		
-		player.CmdAddUnit(unitName, spawnPoint, default(Quaternion));
+		player.AddUnit(worldObjectId, unitName, spawnPoint, default(Quaternion));
 	}
 
 	public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId)

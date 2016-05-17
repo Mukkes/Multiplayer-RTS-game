@@ -252,5 +252,54 @@ namespace RTS
 
 			return spawnPoint;
 		}
+		
+		private static int uniqueWorldObjectId = 0;
+
+		public static int GetUniqueWorldObjectId()
+		{
+			int id = uniqueWorldObjectId;
+			uniqueWorldObjectId++;
+			return id;
+		}
+
+		public static Unit FindUnit(int playerId, int unitId)
+		{
+			Player player = FindPlayer(playerId);
+			if (player)
+			{
+				Units units = player.GetComponentInChildren<Units>();
+				foreach(Transform child in units.transform)
+				{
+					Unit unit = child.gameObject.GetComponent<Unit>();
+					if ((unit) && (unit.id == unitId))
+						return unit;
+				}
+			}
+			return null;
+		}
+
+		public static Building FindBuilding(int playerId, int buildingId)
+		{
+			foreach (GameObject gameObject in Object.FindObjectsOfType(typeof(GameObject)) as GameObject[])
+			{
+				Building building = gameObject.GetComponent<Building>();
+				if ((building != null) && (building.playerId == playerId) && (building.id == buildingId))
+					return building;
+			}
+
+			Player player = FindPlayer(playerId);
+			if (player)
+			{
+				Buildings buildings = player.GetComponentInChildren<Buildings>();
+				foreach (Transform child in buildings.transform)
+				{
+					Debug.Log("A child.");
+					Building building = child.gameObject.GetComponent<Building>();
+					if ((building) && (building.id == buildingId))
+						return building;
+				}
+			}
+			return null;
+		}
 	}
 }

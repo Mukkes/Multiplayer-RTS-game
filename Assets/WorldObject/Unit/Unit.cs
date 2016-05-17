@@ -15,7 +15,6 @@ public class Unit : WorldObject
 	private Vector3 destination;
 	private Quaternion targetRotation;
 	private GameObject destinationTarget;
-	private int loadedDestinationTargetId = -1;
 
 	protected override void Awake()
 	{
@@ -27,10 +26,6 @@ public class Unit : WorldObject
 	protected override void Start()
 	{
 		base.Start();
-		if (player && loadedSavedValues && loadedDestinationTargetId >= 0)
-		{
-			destinationTarget = player.GetObjectForId(loadedDestinationTargetId).gameObject;
-		}
 	}
 
 	protected override void Update()
@@ -166,36 +161,12 @@ public class Unit : WorldObject
 		destinationTarget = null;
 	}
 
-	public virtual void SetBuilding(Building creator)
+	public virtual void SetBuildingId(int buildingId)
 	{
 		//specific initialization for a unit can be specified here
-	}
-
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteBoolean(writer, "Moving", moving);
-		SaveManager.WriteBoolean(writer, "Rotating", rotating);
-		SaveManager.WriteVector(writer, "Destination", destination);
-		SaveManager.WriteQuaternion(writer, "TargetRotation", targetRotation);
-		if (destinationTarget)
+		if (buildingId >= 0)
 		{
-			WorldObject destinationObject = destinationTarget.GetComponent<WorldObject>();
-			if (destinationObject) SaveManager.WriteInt(writer, "DestinationTargetId", destinationObject.ObjectId);
-		}
-	}
 
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "Moving": moving = (bool)readValue; break;
-			case "Rotating": rotating = (bool)readValue; break;
-			case "Destination": destination = LoadManager.LoadVector(reader); break;
-			case "TargetRotation": targetRotation = LoadManager.LoadQuaternion(reader); break;
-			case "DestinationTargetId": loadedDestinationTargetId = (int)(System.Int64)readValue; break;
-			default: break;
 		}
 	}
 

@@ -9,10 +9,10 @@ public class Worker : Unit
 	public float finishedJobVolume = 1.0f;
 	public int buildSpeed;
 
+	private int currentProjectId = -1;
 	private Building currentProject;
 	private bool building = false;
 	private float amountBuilt = 0.0f;
-	private int loadedProjectId = -1;
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
 
@@ -20,17 +20,16 @@ public class Worker : Unit
 	{
 		base.Start();
 		actions = new string[] { "Refinery", "WarFactory", "Turrent", "Wonder" };
-		if (player && loadedSavedValues && loadedProjectId >= 0)
-		{
-			WorldObject obj = player.GetObjectForId(loadedProjectId);
-			if (obj.GetType().IsSubclassOf(typeof(Building))) currentProject = (Building)obj;
-		}
 	}
 
 	protected override void Update()
 	{
 		base.Update();
-		if (!moving && !rotating)
+		if ((currentProjectId >= 0) && (!currentProject))
+		{
+			SetBuilding();
+		}
+		else if (!moving && !rotating)
 		{
 			if (building && currentProject && currentProject.UnderConstruction())
 			{
@@ -52,14 +51,6 @@ public class Worker : Unit
 
 	/*** Public Methods ***/
 
-	public override void SetBuilding(Building project)
-	{
-		base.SetBuilding(project);
-		currentProject = project;
-		StartMove(currentProject.transform.position, currentProject.gameObject);
-		building = true;
-	}
-
 	public override void PerformAction(string actionToPerform)
 	{
 		base.PerformAction(actionToPerform);
@@ -76,7 +67,26 @@ public class Worker : Unit
 	private void CreateBuilding(string buildingName)
 	{
 		Vector3 buildPoint = new Vector3(transform.position.x, transform.position.y, transform.position.z + 10);
-		if (player) player.CreateBuilding(buildingName, buildPoint, this, playingArea);
+		int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
+		if (player) player.CreateBuilding(worldObjectId, buildingName, buildPoint, this, playingArea);
+	}
+
+	public override void SetBuildingId(int buildingId)
+	{
+		currentProjectId = buildingId;
+	}
+
+	private void SetBuilding()
+	{
+		Building building = PlayerManager.FindBuilding(playerId, currentProjectId);
+		if (building)
+		{
+			currentProject = building;
+			StartMove(currentProject.transform.position, currentProject.gameObject);
+			this.building = true;
+			currentProjectId = -1;
+			Debug.Log("Worker: currentProject is set.");
+		}
 	}
 
 	public override void MouseClick(GameObject hitObject, Vector3 hitPoint, Player controller)
@@ -90,32 +100,12 @@ public class Worker : Unit
 			{
 				if (building.UnderConstruction())
 				{
-					SetBuilding(building);
+					SetBuildingId(building.id);
 					doBase = false;
 				}
 			}
 		}
 		if (doBase) base.MouseClick(hitObject, hitPoint, controller);
-	}
-
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteBoolean(writer, "Building", building);
-		SaveManager.WriteFloat(writer, "AmountBuilt", amountBuilt);
-		if (currentProject) SaveManager.WriteInt(writer, "CurrentProjectId", currentProject.ObjectId);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "Building": building = (bool)readValue; break;
-			case "AmountBuilt": amountBuilt = (float)(double)readValue; break;
-			case "CurrentProjectId": loadedProjectId = (int)(System.Int64)readValue; break;
-			default: break;
-		}
 	}
 
 	protected override void InitialiseAudio()
@@ -150,7 +140,7 @@ public class Worker : Unit
 		if (nearestObject)
 		{
 			Building closestBuilding = nearestObject.GetComponent<Building>();
-			if (closestBuilding) SetBuilding(closestBuilding);
+			if (closestBuilding) SetBuildingId(closestBuilding.id);
 		}
 	}
 }

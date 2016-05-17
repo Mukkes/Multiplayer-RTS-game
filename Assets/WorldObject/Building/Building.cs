@@ -45,7 +45,7 @@ public class Building : WorldObject
 		base.OnGUI();
 		if (needsBuilding) DrawBuildProgress();
 	}
-
+	
 	private void DrawBuildProgress()
 	{
 		GUI.skin = ResourceManager.SelectBoxSkin;
@@ -75,25 +75,11 @@ public class Building : WorldObject
 				if (player)
 				{
 					if (audioElement != null) audioElement.Play(finishedJobSound);
-					player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, this);
+					int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
+					player.CmdAddUnit(worldObjectId, buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, id);
 				}
 				currentBuildProgress = 0.0f;
 			}
-		}
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "NeedsBuilding": needsBuilding = (bool)readValue; break;
-			case "SpawnPoint": spawnPoint = LoadManager.LoadVector(reader); break;
-			case "RallyPoint": rallyPoint = LoadManager.LoadVector(reader); break;
-			case "BuildProgress": currentBuildProgress = (float)(double)readValue; break;
-			case "BuildQueue": buildQueue = new Queue<string>(LoadManager.LoadStringArray(reader)); break;
-			case "PlayingArea": playingArea = LoadManager.LoadRect(reader); break;
-			default: break;
 		}
 	}
 
@@ -216,17 +202,6 @@ public class Building : WorldObject
 			RestoreMaterials();
 			SetTeamColor();
 		}
-	}
-
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteBoolean(writer, "NeedsBuilding", needsBuilding);
-		SaveManager.WriteVector(writer, "SpawnPoint", spawnPoint);
-		SaveManager.WriteVector(writer, "RallyPoint", rallyPoint);
-		SaveManager.WriteFloat(writer, "BuildProgress", currentBuildProgress);
-		SaveManager.WriteStringArray(writer, "BuildQueue", buildQueue.ToArray());
-		if (needsBuilding) SaveManager.WriteRect(writer, "PlayingArea", playingArea);
 	}
 
 	public override void SetParent()
