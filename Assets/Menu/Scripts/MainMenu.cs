@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.Networking;
-using System.Collections;
 using RTS;
-using UnityEngine.SceneManagement;
 
 public class MainMenu : Menu
 {
@@ -23,12 +20,6 @@ public class MainMenu : Menu
 		}
 	}
 
-	private void Multiplayer()
-	{
-		GetComponent<MainMenu>().enabled = false;
-		GetComponent<MultiplayerMenu>().enabled = true;
-	}
-
 	void OnLevelWasLoaded()
 	{
 		Cursor.visible = true;
@@ -45,6 +36,11 @@ public class MainMenu : Menu
 		}
 	}
 
+	protected override void HideCurrentMenu()
+	{
+		GetComponent<MainMenu>().enabled = false;
+	}
+
 	private void ChangePlayer()
 	{
 		GetComponent<MainMenu>().enabled = false;
@@ -52,8 +48,9 @@ public class MainMenu : Menu
 		SelectionList.LoadEntries(PlayerManager.GetPlayerNames());
 	}
 
-	protected override void HideCurrentMenu()
+	private void Multiplayer()
 	{
 		GetComponent<MainMenu>().enabled = false;
+		GetComponent<MultiplayerMenu>().enabled = true;
 	}
 }

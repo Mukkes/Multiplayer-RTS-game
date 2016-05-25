@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using RTS;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 
 public class Unit : WorldObject

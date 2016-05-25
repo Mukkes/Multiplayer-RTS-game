@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using RTS;
 
 public class UserInput : MonoBehaviour
