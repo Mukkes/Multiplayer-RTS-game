@@ -92,7 +92,7 @@ public class HUD : MonoBehaviour
 	// Update is called once per frame
 	void OnGUI()
 	{
-		if (player && player.human)
+		if (player && player.human && player.isLocalPlayer)
 		{
 			DrawPlayerDetails();
 			DrawOrdersBar();

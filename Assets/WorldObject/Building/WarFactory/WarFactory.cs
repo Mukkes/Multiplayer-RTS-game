@@ -1,8 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class WarFactory : Building {
-	
+public class WarFactory : Building
+{
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "WarFactory";
+		maxHitPoints = 100;
+		cost = 250;
+		sellValue = 125;
+	}
+
 	protected override void Start () {
 		base.Start();
 		actions = new string[] { "Tank", "ConvoyTruck" };

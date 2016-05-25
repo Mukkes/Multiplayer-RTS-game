@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 public class AudioElement
 {
-
 	private GameObject element;
 	private Dictionary<AudioClip, GameObject> soundObjects = new Dictionary<AudioClip, GameObject>();
 
@@ -37,13 +35,14 @@ public class AudioElement
 		}
 	}
 
-	public void Play(AudioClip sound)
+	public bool IsPlaying(AudioClip sound)
 	{
 		GameObject temp;
 		if (soundObjects.TryGetValue(sound, out temp))
 		{
-			if (temp != null && !temp.GetComponent<AudioSource>().isPlaying) temp.GetComponent<AudioSource>().Play();
+			return temp.GetComponent<AudioSource>().isPlaying;
 		}
+		return false;
 	}
 
 	public void Pause(AudioClip sound)
@@ -55,6 +54,15 @@ public class AudioElement
 		}
 	}
 
+	public void Play(AudioClip sound)
+	{
+		GameObject temp;
+		if (soundObjects.TryGetValue(sound, out temp))
+		{
+			if (temp != null && !temp.GetComponent<AudioSource>().isPlaying) temp.GetComponent<AudioSource>().Play();
+		}
+	}
+
 	public void Stop(AudioClip sound)
 	{
 		GameObject temp;
@@ -62,15 +70,5 @@ public class AudioElement
 		{
 			temp.GetComponent<AudioSource>().Stop();
 		}
-	}
-
-	public bool IsPlaying(AudioClip sound)
-	{
-		GameObject temp;
-		if (soundObjects.TryGetValue(sound, out temp))
-		{
-			return temp.GetComponent<AudioSource>().isPlaying;
-		}
-		return false;
 	}
 }

@@ -1,24 +1,34 @@
 ﻿using UnityEngine;
-using System.Collections;
 using RTS;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using UnityEngine.Networking;
 
-public class WorldObject : MonoBehaviour
+public abstract class WorldObject : NetworkBehaviour
 {
+	[SyncVar]
+	public int hitPoints;
+	[SyncVar]
+	public int id = -1;
+	[SyncVar]
+	public int playerId = -1;
 
 	public string objectName;
 	public Texture2D buildImage;
-	public int cost, sellValue, hitPoints, maxHitPoints;
+	public int cost;
+	public int sellValue;
+	public int maxHitPoints;
+	public Player player;
+	public GameObject playerObject;
 	public float weaponRange = 10.0f;
 	public float weaponRechargeTime = 1.0f;
 	public float weaponAimSpeed = 1.0f;
 	public AudioClip attackSound, selectSound, useWeaponSound;
 	public float attackVolume = 1.0f, selectVolume = 1.0f, useWeaponVolume = 1.0f;
 	public float detectionRange = 20.0f;
-
+	// Check if network things has been done.
+	public bool handleNetwork = true;
+	
 	protected AudioElement audioElement;
-	protected Player player;
 	protected string[] actions = { };
 	protected bool currentlySelected = false;
 	protected Bounds selectionBounds;
@@ -29,17 +39,13 @@ public class WorldObject : MonoBehaviour
 	protected bool attacking = false;
 	protected bool movingIntoPosition = false;
 	protected bool aiming = false;
-	protected bool loadedSavedValues = false;
 	protected List<WorldObject> nearbyObjects;
 
 	private float currentWeaponChargeTime;
 	private List<Material> oldMaterials = new List<Material>();
-	private int loadedTargetId = -1;
 	//we want to restrict how many decisions are made to help with game performance
 	//the default time at the moment is a tenth of a second
 	private float timeSinceLastDecision = 0.0f, timeBetweenDecisions = 0.1f;
-
-	public int ObjectId { get; set; }
 
 	protected virtual void Awake()
 	{
@@ -49,30 +55,49 @@ public class WorldObject : MonoBehaviour
 
 	protected virtual void Start()
 	{
-		SetPlayer();
-		if (player)
-		{
-			if (loadedSavedValues)
-			{
-				if (loadedTargetId >= 0) target = player.GetObjectForId(loadedTargetId);
-			}
-			else {
-				SetTeamColor();
-			}
-		}
+		if (handleNetwork)
+			HandleNetwork();
+		
 		InitialiseAudio();
 	}
 
 	protected virtual void Update()
 	{
-		if (ShouldMakeDecision()) DecideWhatToDo();
-		currentWeaponChargeTime += Time.deltaTime;
-		if (attacking && !movingIntoPosition && !aiming) PerformAttack();
+		if (handleNetwork)
+		{
+			HandleNetwork();
+		}
+		else if (player.isLocalPlayer && player.human)
+		{
+			if (ShouldMakeDecision()) DecideWhatToDo();
+			currentWeaponChargeTime += Time.deltaTime;
+			if (attacking && !movingIntoPosition && !aiming) PerformAttack();
+		}
+		if (!isLocalPlayer)
+			CalculateBounds();
+	}
+
+	protected virtual void HandleNetwork()
+	{
+		if (playerId >= 0)
+		{
+			player = PlayerManager.FindPlayer(playerId);
+			if (player != null)
+			{
+				SetPlayer();
+				handleNetwork = false;
+			}
+		}
 	}
 
 	protected virtual void OnGUI()
 	{
 		if (currentlySelected && !ResourceManager.MenuOpen) DrawSelection();
+	}
+
+	public void SetId(int id)
+	{
+		this.id = id;
 	}
 
 	public virtual void SetSelection(bool selected, Rect playingArea)
@@ -109,7 +134,7 @@ public class WorldObject : MonoBehaviour
 				Player owner = hitObject.transform.root.GetComponent<Player>();
 				if (owner)
 				{ //the object is controlled by a player
-					if (player && player.human)
+					if (player && player.human && player.isLocalPlayer)
 					{ //this object is controlled by a human player
 					  //start attack if object is not owned by the same player and this object can attack, else select
 						if (player.username != owner.username && CanAttack()) BeginAttack(worldObject);
@@ -131,7 +156,7 @@ public class WorldObject : MonoBehaviour
 		worldObject.SetSelection(true, controller.hud.GetPlayingArea());
 	}
 
-	private void DrawSelection()
+	protected virtual void DrawSelection()
 	{
 		GUI.skin = ResourceManager.SelectBoxSkin;
 		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
@@ -148,6 +173,12 @@ public class WorldObject : MonoBehaviour
 		{
 			selectionBounds.Encapsulate(r.bounds);
 		}
+	}
+
+	[Command]
+	protected void CmdSetHitPoints(int hitPoints)
+	{
+		this.hitPoints = hitPoints;
 	}
 
 	protected virtual void DrawSelectionBox(Rect selectBox)
@@ -175,7 +206,7 @@ public class WorldObject : MonoBehaviour
 	public virtual void SetHoverState(GameObject hoverObject)
 	{
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			//something other than the ground is being hovered over
 			if (!WorkManager.ObjectIsGround(hoverObject))
@@ -245,10 +276,18 @@ public class WorldObject : MonoBehaviour
 		this.playingArea = playingArea;
 	}
 
-	public void SetPlayer()
+	public void SetPlayerId(int id)
 	{
-		player = transform.root.GetComponentInChildren<Player>();
+		playerId = id;
 	}
+
+	protected void SetPlayer()
+	{
+		SetParent();
+		SetTeamColor();
+	}
+
+	public abstract void SetParent();
 
 	public virtual bool CanAttack()
 	{
@@ -352,73 +391,6 @@ public class WorldObject : MonoBehaviour
 		if (hitPoints <= 0) Destroy(gameObject);
 	}
 
-	public virtual void SaveDetails(JsonWriter writer)
-	{
-		SaveManager.WriteString(writer, "Type", name);
-		SaveManager.WriteString(writer, "Name", objectName);
-		SaveManager.WriteInt(writer, "Id", ObjectId);
-		SaveManager.WriteVector(writer, "Position", transform.position);
-		SaveManager.WriteQuaternion(writer, "Rotation", transform.rotation);
-		SaveManager.WriteVector(writer, "Scale", transform.localScale);
-		SaveManager.WriteInt(writer, "HitPoints", hitPoints);
-		SaveManager.WriteBoolean(writer, "Attacking", attacking);
-		SaveManager.WriteBoolean(writer, "MovingIntoPosition", movingIntoPosition);
-		SaveManager.WriteBoolean(writer, "Aiming", aiming);
-		if (attacking)
-		{
-			//only save if attacking so that we do not end up storing massive numbers for no reason
-			SaveManager.WriteFloat(writer, "CurrentWeaponChargeTime", currentWeaponChargeTime);
-		}
-		if (target != null) SaveManager.WriteInt(writer, "TargetId", target.ObjectId);
-	}
-
-	public void LoadDetails(JsonTextReader reader)
-	{
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName)
-				{
-					string propertyName = (string)reader.Value;
-					reader.Read();
-					HandleLoadedProperty(reader, propertyName, reader.Value);
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndObject)
-			{
-				//loaded position invalidates the selection bounds so they must be recalculated
-				selectionBounds = ResourceManager.InvalidBounds;
-				CalculateBounds();
-				loadedSavedValues = true;
-				return;
-			}
-		}
-		//loaded position invalidates the selection bounds so they must be recalculated
-		selectionBounds = ResourceManager.InvalidBounds;
-		CalculateBounds();
-		loadedSavedValues = true;
-	}
-
-	protected virtual void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		switch (propertyName)
-		{
-			case "Name": objectName = (string)readValue; break;
-			case "Id": ObjectId = (int)(System.Int64)readValue; break;
-			case "Position": transform.localPosition = LoadManager.LoadVector(reader); break;
-			case "Rotation": transform.localRotation = LoadManager.LoadQuaternion(reader); break;
-			case "Scale": transform.localScale = LoadManager.LoadVector(reader); break;
-			case "HitPoints": hitPoints = (int)(System.Int64)readValue; break;
-			case "Attacking": attacking = (bool)readValue; break;
-			case "MovingIntoPosition": movingIntoPosition = (bool)readValue; break;
-			case "Aiming": aiming = (bool)readValue; break;
-			case "CurrentWeaponChargeTime": currentWeaponChargeTime = (float)(double)readValue; break;
-			case "TargetId": loadedTargetId = (int)(System.Int64)readValue; break;
-			default: break;
-		}
-	}
-
 	protected virtual void InitialiseAudio()
 	{
 		List<AudioClip> sounds = new List<AudioClip>();
@@ -435,7 +407,7 @@ public class WorldObject : MonoBehaviour
 		if (useWeaponVolume > 1.0f) useWeaponVolume = 1.0f;
 		sounds.Add(useWeaponSound);
 		volumes.Add(useWeaponVolume);
-		audioElement = new AudioElement(sounds, volumes, objectName + ObjectId, this.transform);
+		audioElement = new AudioElement(sounds, volumes, objectName, this.transform);
 	}
 
 	/**

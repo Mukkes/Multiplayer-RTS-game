@@ -1,23 +1,32 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using RTS;
-using Newtonsoft.Json;
+using UnityEngine.Networking;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
+	[SyncVar]
+	public int id = -1;
+	[SyncVar]
+	private bool findingPlacement = false;
+	[SyncVar]
+	private int tempBuildingId = -1;
+	[SyncVar]
+	private int tempCreatorId = -1;
+
 	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
 	public string username;
 	public bool human;
 	public HUD hud;
 	public Material notAllowedMaterial, allowedMaterial;
 	public Color teamColor;
-
+	// Check if network things has been done.
+	public bool handleNetwork = true;
+	
 	private Dictionary<ResourceType, int> resources, resourceLimits;
 	private Building tempBuilding;
 	private Unit tempCreator;
-	private bool findingPlacement = false;
-
+	
 	public WorldObject SelectedObject
 	{
 		get;
@@ -33,6 +42,8 @@ public class Player : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
+		if (handleNetwork)
+			HandleNetwork();
 		hud = GetComponentInChildren<HUD>();
 		AddStartResourceLimits();
 		AddStartResources();
@@ -41,15 +52,57 @@ public class Player : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		if (human)
+		if (handleNetwork)
+			HandleNetwork();
+		
+		if (human && isLocalPlayer)
 		{
 			hud.SetResourceValues(resources, resourceLimits);
-			if (findingPlacement)
+			if ((tempBuildingId >= 0) && (!tempBuilding))
+			{
+				SetTempBuilding();
+			}
+			else if ((tempCreatorId >= 0) && (!tempCreator))
+			{
+				SetTempCreator();
+			}
+			else if (findingPlacement)
 			{
 				tempBuilding.CalculateBounds();
 				if (CanPlaceBuilding()) tempBuilding.SetTransparentMaterial(allowedMaterial, false);
 				else tempBuilding.SetTransparentMaterial(notAllowedMaterial, false);
 			}
+		}
+	}
+
+	private void HandleNetwork()
+	{
+		if (id >= 0)
+		{
+			teamColor = PlayerManager.GetTeamColor(id);
+			handleNetwork = false;
+		}
+	}
+
+	private void SetTempBuilding()
+	{
+		Building building = PlayerManager.FindBuilding(id, tempBuildingId);
+		if (building)
+		{
+			tempBuilding = building;
+			tempBuildingId = -1;
+			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
+			tempBuilding.SetColliders(false);
+		}
+	}
+
+	private void SetTempCreator()
+	{
+		Unit unit = PlayerManager.FindUnit(id, tempCreatorId);
+		if (unit)
+		{
+			tempCreator = unit;
+			tempCreatorId = -1;
 		}
 	}
 
@@ -73,6 +126,17 @@ public class Player : MonoBehaviour
 		AddResource(ResourceType.Power, startPower);
 	}
 
+	[Command]
+	private void CmdSetFindingPlacement(bool findingPlacement)
+	{
+		this.findingPlacement = findingPlacement;
+	}
+
+	public void SetId(int id)
+	{
+		this.id = id;
+	}
+
 	public void AddResource(ResourceType type, int amount)
 	{
 		resources[type] += amount;
@@ -82,43 +146,55 @@ public class Player : MonoBehaviour
 	{
 		resourceLimits[type] += amount;
 	}
-
-	public void AddUnit(string unitName, Vector3 spawnPoint, Quaternion rotation)
+	
+	public void AddUnit(int unitId, string unitName, Vector3 spawnPoint, Quaternion rotation)
 	{
-		Units units = GetComponentInChildren<Units>();
-		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-		newUnit.transform.parent = units.transform;
+		AddUnit(unitId, unitName, spawnPoint, rotation, -1);
+	}
+	
+	public void AddUnit(int unitId, string unitName, Vector3 spawnPoint, Quaternion rotation, int creator)
+	{
+		CmdAddUnit(unitId, unitName, spawnPoint, spawnPoint, rotation, creator);
 	}
 
-	public void AddUnit(string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation, Building creator)
+	[Command]
+	public void CmdAddUnit(int unitId, string unitName, Vector3 spawnPoint, Vector3 rallyPoint, Quaternion rotation, int creator)
 	{
-		Units units = GetComponentInChildren<Units>();
 		GameObject newUnit = (GameObject)Instantiate(ResourceManager.GetUnit(unitName), spawnPoint, rotation);
-		newUnit.transform.parent = units.transform;
 		Unit unitObject = newUnit.GetComponent<Unit>();
-		if (unitObject && spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);
-
 		if (unitObject)
 		{
-			unitObject.SetBuilding(creator);
-			unitObject.ObjectId = ResourceManager.GetNewObjectId();
+			unitObject.SetId(unitId);
+			unitObject.SetPlayerId(id);
+			unitObject.SetBuildingId(creator);
 			if (spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);
+			NetworkServer.SpawnWithClientAuthority(newUnit, connectionToClient);
 		}
+		else Destroy(newUnit);
 	}
 
-	public void CreateBuilding(string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
+	public void CreateBuilding(int buildingId, string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
+	{
+		if (findingPlacement) CancelBuildingPlacement();
+		CmdCreateBuilding(buildingId, buildingName, buildPoint, creator.id, playingArea);
+	}
+
+	[Command]
+	public void CmdCreateBuilding(int buildingId, string buildingName, Vector3 buildPoint, int creatorId, Rect playingArea)
 	{
 		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(buildingName), buildPoint, new Quaternion());
-		tempBuilding = newBuilding.GetComponent<Building>();
+		Building tempBuilding = newBuilding.GetComponent<Building>();
 		if (tempBuilding)
 		{
-			tempBuilding.ObjectId = ResourceManager.GetNewObjectId();
-			tempCreator = creator;
+			tempBuildingId = buildingId;
+			tempCreatorId = creatorId;
 			findingPlacement = true;
-			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
-			tempBuilding.SetColliders(false);
-			tempBuilding.SetPlayingArea(playingArea);
+			tempBuilding.SetId(buildingId);
+			tempBuilding.SetPlayerId(id);
 			tempBuilding.hitPoints = 0;
+			tempBuilding.SetColliders(true);
+			tempBuilding.SetPlayingArea(playingArea);
+			NetworkServer.SpawnWithClientAuthority(newBuilding, connectionToClient);
 		}
 		else Destroy(newBuilding);
 	}
@@ -137,8 +213,6 @@ public class Player : MonoBehaviour
 
 	public bool CanPlaceBuilding()
 	{
-		bool canPlace = true;
-
 		Bounds placeBounds = tempBuilding.GetSelectionBounds();
 		//shorthand for the coordinates of the center of the selection bounds
 		float cx = placeBounds.center.x;
@@ -166,169 +240,42 @@ public class Player : MonoBehaviour
 			if (hitObject && !WorkManager.ObjectIsGround(hitObject))
 			{
 				WorldObject worldObject = hitObject.transform.parent.GetComponent<WorldObject>();
-				if (worldObject && placeBounds.Intersects(worldObject.GetSelectionBounds())) canPlace = false;
+				if (worldObject && placeBounds.Intersects(worldObject.GetSelectionBounds()))
+				{
+					return false;
+				}
 			}
 		}
-		return canPlace;
+		return true;
 	}
 
 	public void StartConstruction()
 	{
-		findingPlacement = false;
-		Buildings buildings = GetComponentInChildren<Buildings>();
-		if (buildings) tempBuilding.transform.parent = buildings.transform;
-		tempBuilding.SetPlayer();
+		CmdSetFindingPlacement(false);
 		tempBuilding.SetColliders(true);
-		tempCreator.SetBuilding(tempBuilding);
+		tempCreator.SetBuildingId(tempBuilding.id);
 		tempBuilding.StartConstruction();
 		RemoveResource(ResourceType.Money, tempBuilding.cost);
+		tempBuildingId = -1;
+		tempBuilding = null;
 	}
 
 	public void CancelBuildingPlacement()
 	{
-		findingPlacement = false;
-		Destroy(tempBuilding.gameObject);
+		CmdSetFindingPlacement(false);
+		CmdDestroy(tempBuilding.gameObject);
+		tempBuildingId = -1;
 		tempBuilding = null;
+		tempCreatorId = -1;
 		tempCreator = null;
 	}
 
-	public virtual void SaveDetails(JsonWriter writer)
+	[Command]
+	public void CmdDestroy(GameObject gameObject)
 	{
-		SaveManager.WriteString(writer, "Username", username);
-		SaveManager.WriteBoolean(writer, "Human", human);
-		SaveManager.WriteColor(writer, "TeamColor", teamColor);
-		SaveManager.SavePlayerResources(writer, resources, resourceLimits);
-		SaveManager.SavePlayerBuildings(writer, GetComponentsInChildren<Building>());
-		SaveManager.SavePlayerUnits(writer, GetComponentsInChildren<Unit>());
+		NetworkServer.Destroy(gameObject);
 	}
-
-	public WorldObject GetObjectForId(int id)
-	{
-		WorldObject[] objects = GameObject.FindObjectsOfType(typeof(WorldObject)) as WorldObject[];
-		foreach (WorldObject obj in objects)
-		{
-			if (obj.ObjectId == id) return obj;
-		}
-		return null;
-	}
-
-	public void LoadDetails(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		string currValue = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName)
-				{
-					currValue = (string)reader.Value;
-				}
-				else {
-					switch (currValue)
-					{
-						case "Username": username = (string)reader.Value; break;
-						case "Human": human = (bool)reader.Value; break;
-						default: break;
-					}
-				}
-			}
-			else if (reader.TokenType == JsonToken.StartObject || reader.TokenType == JsonToken.StartArray)
-			{
-				switch (currValue)
-				{
-					case "TeamColor": teamColor = LoadManager.LoadColor(reader); break;
-					case "Resources": LoadResources(reader); break;
-					case "Buildings": LoadBuildings(reader); break;
-					case "Units": LoadUnits(reader); break;
-					default: break;
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndObject) return;
-		}
-	}
-
-	private void LoadResources(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		string currValue = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
-				else {
-					switch (currValue)
-					{
-						case "Money": startMoney = (int)(System.Int64)reader.Value; break;
-						case "Money_Limit": startMoneyLimit = (int)(System.Int64)reader.Value; break;
-						case "Power": startPower = (int)(System.Int64)reader.Value; break;
-						case "Power_Limit": startPowerLimit = (int)(System.Int64)reader.Value; break;
-						default: break;
-					}
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndArray)
-			{
-				return;
-			}
-		}
-	}
-
-	private void LoadBuildings(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		Buildings buildings = GetComponentInChildren<Buildings>();
-		string currValue = "", type = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
-				else if (currValue == "Type")
-				{
-					type = (string)reader.Value;
-					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetBuilding(type));
-					Building building = newObject.GetComponent<Building>();
-					building.LoadDetails(reader);
-					building.transform.parent = buildings.transform;
-					building.SetPlayer();
-					building.SetTeamColor();
-					if (building.UnderConstruction())
-					{
-						building.SetTransparentMaterial(allowedMaterial, true);
-					}
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndArray) return;
-		}
-	}
-
-	private void LoadUnits(JsonTextReader reader)
-	{
-		if (reader == null) return;
-		Units units = GetComponentInChildren<Units>();
-		string currValue = "", type = "";
-		while (reader.Read())
-		{
-			if (reader.Value != null)
-			{
-				if (reader.TokenType == JsonToken.PropertyName) currValue = (string)reader.Value;
-				else if (currValue == "Type")
-				{
-					type = (string)reader.Value;
-					GameObject newObject = (GameObject)GameObject.Instantiate(ResourceManager.GetUnit(type));
-					Unit unit = newObject.GetComponent<Unit>();
-					unit.LoadDetails(reader);
-					unit.transform.parent = units.transform;
-					unit.SetPlayer();
-					unit.SetTeamColor();
-				}
-			}
-			else if (reader.TokenType == JsonToken.EndArray) return;
-		}
-	}
-
+	
 	public bool IsDead()
 	{
 		Building[] buildings = GetComponentsInChildren<Building>();

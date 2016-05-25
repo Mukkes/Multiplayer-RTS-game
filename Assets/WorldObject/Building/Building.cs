@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using RTS;
-using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 public class Building : WorldObject
 {
+	[SyncVar]
+	private bool needsBuilding = false;
+	
 	public AudioClip finishedJobSound;
 	public float finishedJobVolume = 1.0f;
 	public Texture2D rallyPointImage;
@@ -15,7 +17,6 @@ public class Building : WorldObject
 	protected Queue<string> buildQueue;
 	protected Vector3 rallyPoint;
 
-	private bool needsBuilding = false;
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
 
@@ -27,6 +28,7 @@ public class Building : WorldObject
 		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
 		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
 		rallyPoint = spawnPoint;
+		hitPoints = 0;
 	}
 
 	protected override void Start()
@@ -40,10 +42,27 @@ public class Building : WorldObject
 		ProcessBuildQueue();
 	}
 
-	protected override void OnGUI()
+	protected override void DrawSelection()
 	{
-		base.OnGUI();
+		base.DrawSelection();
 		if (needsBuilding) DrawBuildProgress();
+	}
+	
+	private void DrawBuildProgress()
+	{
+		GUI.skin = ResourceManager.SelectBoxSkin;
+		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
+		//Draw the selection box around the currently selected object, within the bounds of the main draw area
+		GUI.BeginGroup(playingArea);
+		CalculateCurrentHealth(0.5f, 0.99f);
+		DrawHealthBar(selectBox, "Building ...");
+		GUI.EndGroup();
+	}
+
+	[Command]
+	private void CmdSetNeedsBuilding(bool needsBuilding)
+	{
+		this.needsBuilding = needsBuilding;
 	}
 
 	protected void CreateUnit(string unitName)
@@ -64,11 +83,24 @@ public class Building : WorldObject
 				if (player)
 				{
 					if (audioElement != null) audioElement.Play(finishedJobSound);
-					player.AddUnit(buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, this);
+					int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
+					player.CmdAddUnit(worldObjectId, buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, id);
 				}
 				currentBuildProgress = 0.0f;
 			}
 		}
+	}
+
+	protected override void InitialiseAudio()
+	{
+		base.InitialiseAudio();
+		if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
+		if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
+		List<AudioClip> sounds = new List<AudioClip>();
+		List<float> volumes = new List<float>();
+		sounds.Add(finishedJobSound);
+		volumes.Add(finishedJobVolume);
+		audioElement.Add(sounds, volumes);
 	}
 
 	public string[] getBuildQueueValues()
@@ -92,7 +124,7 @@ public class Building : WorldObject
 			RallyPoint flag = player.GetComponentInChildren<RallyPoint>();
 			if (selected)
 			{
-				if (flag && player.human && spawnPoint != ResourceManager.InvalidPosition && rallyPoint != ResourceManager.InvalidPosition)
+				if (flag && player.human && player.isLocalPlayer && spawnPoint != ResourceManager.InvalidPosition && rallyPoint != ResourceManager.InvalidPosition)
 				{
 					flag.transform.localPosition = rallyPoint;
 					flag.transform.forward = transform.forward;
@@ -100,7 +132,7 @@ public class Building : WorldObject
 				}
 			}
 			else {
-				if (flag && player.human) flag.Disable();
+				if (flag && player.human && player.isLocalPlayer) flag.Disable();
 			}
 		}
 	}
@@ -114,7 +146,7 @@ public class Building : WorldObject
 	{
 		base.SetHoverState(hoverObject);
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			if (WorkManager.ObjectIsGround(hoverObject))
 			{
@@ -127,7 +159,7 @@ public class Building : WorldObject
 	{
 		base.MouseClick(hitObject, hitPoint, controller);
 		//only handle iput if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			if (WorkManager.ObjectIsGround(hitObject))
 			{
@@ -142,7 +174,7 @@ public class Building : WorldObject
 	public void SetRallyPoint(Vector3 position)
 	{
 		rallyPoint = position;
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			RallyPoint flag = player.GetComponentInChildren<RallyPoint>();
 			if (flag) flag.transform.localPosition = rallyPoint;
@@ -159,19 +191,8 @@ public class Building : WorldObject
 	public void StartConstruction()
 	{
 		CalculateBounds();
-		needsBuilding = true;
+		CmdSetNeedsBuilding(true);
 		hitPoints = 0;
-	}
-
-	private void DrawBuildProgress()
-	{
-		GUI.skin = ResourceManager.SelectBoxSkin;
-		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
-		//Draw the selection box around the currently selected object, within the bounds of the main draw area
-		GUI.BeginGroup(playingArea);
-		CalculateCurrentHealth(0.5f, 0.99f);
-		DrawHealthBar(selectBox, "Building ...");
-		GUI.EndGroup();
 	}
 
 	public bool UnderConstruction()
@@ -181,51 +202,19 @@ public class Building : WorldObject
 
 	public void Construct(int amount)
 	{
-		hitPoints += amount;
+		CmdSetHitPoints(hitPoints + amount);
 		if (hitPoints >= maxHitPoints)
 		{
-			hitPoints = maxHitPoints;
-			needsBuilding = false;
+			CmdSetHitPoints(maxHitPoints);
+			CmdSetNeedsBuilding(false);
 			RestoreMaterials();
 			SetTeamColor();
 		}
 	}
 
-	public override void SaveDetails(JsonWriter writer)
+	public override void SetParent()
 	{
-		base.SaveDetails(writer);
-		SaveManager.WriteBoolean(writer, "NeedsBuilding", needsBuilding);
-		SaveManager.WriteVector(writer, "SpawnPoint", spawnPoint);
-		SaveManager.WriteVector(writer, "RallyPoint", rallyPoint);
-		SaveManager.WriteFloat(writer, "BuildProgress", currentBuildProgress);
-		SaveManager.WriteStringArray(writer, "BuildQueue", buildQueue.ToArray());
-		if (needsBuilding) SaveManager.WriteRect(writer, "PlayingArea", playingArea);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "NeedsBuilding": needsBuilding = (bool)readValue; break;
-			case "SpawnPoint": spawnPoint = LoadManager.LoadVector(reader); break;
-			case "RallyPoint": rallyPoint = LoadManager.LoadVector(reader); break;
-			case "BuildProgress": currentBuildProgress = (float)(double)readValue; break;
-			case "BuildQueue": buildQueue = new Queue<string>(LoadManager.LoadStringArray(reader)); break;
-			case "PlayingArea": playingArea = LoadManager.LoadRect(reader); break;
-			default: break;
-		}
-	}
-
-	protected override void InitialiseAudio()
-	{
-		base.InitialiseAudio();
-		if (finishedJobVolume < 0.0f) finishedJobVolume = 0.0f;
-		if (finishedJobVolume > 1.0f) finishedJobVolume = 1.0f;
-		List<AudioClip> sounds = new List<AudioClip>();
-		List<float> volumes = new List<float>();
-		sounds.Add(finishedJobSound);
-		volumes.Add(finishedJobVolume);
-		audioElement.Add(sounds, volumes);
+		Buildings buildings = player.GetComponentInChildren<Buildings>();
+		transform.parent = buildings.transform;
 	}
 }

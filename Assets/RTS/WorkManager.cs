@@ -80,7 +80,6 @@ namespace RTS
 		public static List<WorldObject> FindNearbyObjects(Vector3 position, float range)
 		{
 			Collider[] hitColliders = Physics.OverlapSphere(position, range);
-			HashSet<int> nearbyObjectIds = new HashSet<int>();
 			List<WorldObject> nearbyObjects = new List<WorldObject>();
 			for (int i = 0; i < hitColliders.Length; i++)
 			{
@@ -88,9 +87,8 @@ namespace RTS
 				if (parent)
 				{
 					WorldObject parentObject = parent.GetComponent<WorldObject>();
-					if (parentObject && !nearbyObjectIds.Contains(parentObject.ObjectId))
+					if (parentObject)
 					{
-						nearbyObjectIds.Add(parentObject.ObjectId);
 						nearbyObjects.Add(parentObject);
 					}
 				}

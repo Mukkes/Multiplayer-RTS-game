@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using RTS;
-using Newtonsoft.Json;
+﻿using RTS;
 
 public class Resource : WorldObject
 {
@@ -14,11 +12,16 @@ public class Resource : WorldObject
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
 
+	protected override void Awake()
+	{
+		base.Awake();
+		hitPoints = 0;
+	}
+
 	protected override void Start()
 	{
 		base.Start();
 		resourceType = ResourceType.Unknown;
-		if (loadedSavedValues) return;
 		amountLeft = capacity;
 	}
 
@@ -45,25 +48,14 @@ public class Resource : WorldObject
 		healthPercentage = amountLeft / capacity;
 		healthStyle.normal.background = ResourceManager.GetResourceHealthBar(resourceType);
 	}
-	
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteFloat(writer, "AmountLeft", amountLeft);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "AmountLeft": amountLeft = (float)(double)readValue; break;
-			default: break;
-		}
-	}
 
 	protected override bool ShouldMakeDecision()
 	{
 		return false;
+	}
+	
+	public override void SetParent()
+	{
+
 	}
 }

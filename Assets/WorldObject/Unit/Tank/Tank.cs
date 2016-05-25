@@ -7,6 +7,16 @@ public class Tank : Unit {
 
 	private Quaternion aimRotation;
 
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "Tank";
+		hitPoints = 150;
+		maxHitPoints = 150;
+		cost = 150;
+		sellValue = 75;
+	}
+
 	// Use this for initialization
 	protected override void Start () {
 		base.Start();
@@ -50,21 +60,5 @@ public class Tank : Unit {
 		Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
 		projectile.SetRange(0.9f * weaponRange);
 		projectile.SetTarget(target);
-	}
-
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteQuaternion(writer, "AimRotation", aimRotation);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
-		{
-			case "AimRotation": aimRotation = LoadManager.LoadQuaternion(reader); break;
-			default: break;
-		}
 	}
 }

@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using RTS;
-using Newtonsoft.Json;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public class Harvester : Unit
 {
 
 	public float capacity;
+	public int resourceStoreId = -1;
 	public Building resourceStore;
 	public float collectionAmount, depositAmount;
 	public AudioClip emptyHarvestSound, harvestSound, startHarvestSound;
@@ -17,38 +18,33 @@ public class Harvester : Unit
 	private float currentLoad = 0.0f;
 	private ResourceType harvestType;
 	private Resource resourceDeposit;
-	private int loadedDepositId = -1, loadedStoreId = -1;
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
+
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "Harvester";
+		hitPoints = 100;
+		maxHitPoints = 100;
+		cost = 100;
+		sellValue = 50;
+	}
 
 	protected override void Start()
 	{
 		base.Start();
-		if (loadedSavedValues)
-		{
-			if (player)
-			{
-				if (loadedStoreId >= 0)
-				{
-					WorldObject obj = player.GetObjectForId(loadedStoreId);
-					if (obj.GetType().IsSubclassOf(typeof(Building))) resourceStore = (Building)obj;
-				}
-				if (loadedDepositId >= 0)
-				{
-					WorldObject obj = player.GetObjectForId(loadedDepositId);
-					if (obj.GetType().IsSubclassOf(typeof(Resource))) resourceDeposit = (Resource)obj;
-				}
-			}
-		}
-		else {
-			harvestType = ResourceType.Unknown;
-		}
+		harvestType = ResourceType.Unknown;
 	}
 
 	protected override void Update()
 	{
 		base.Update();
-		if (!rotating && !moving)
+		if ((resourceStoreId >= 0) && (!resourceStore))
+		{
+			SetBuilding();
+		}
+		else if (!rotating && !moving)
 		{
 			if (harvesting || emptying)
 			{
@@ -57,7 +53,7 @@ public class Harvester : Unit
 				if (harvesting)
 				{
 					Collect();
-					if (currentLoad >= capacity)
+					if ((currentLoad >= capacity) && (resourceStore))
 					{
 						//make sure that we have a whole number to avoid bugs
 						//caused by floating point numbers
@@ -91,7 +87,7 @@ public class Harvester : Unit
 	{
 		base.SetHoverState(hoverObject);
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected)
+		if (player && player.human && player.isLocalPlayer && currentlySelected)
 		{
 			if (!WorkManager.ObjectIsGround(hoverObject))
 			{
@@ -105,7 +101,7 @@ public class Harvester : Unit
 	{
 		base.MouseClick(hitObject, hitPoint, controller);
 		//only handle input if owned by a human player
-		if (player && player.human)
+		if (player && player.human && player.isLocalPlayer)
 		{
 			if (!WorkManager.ObjectIsGround(hitObject))
 			{
@@ -193,37 +189,19 @@ public class Harvester : Unit
 		if (resourceBar) GUI.DrawTexture(new Rect(leftPos, topPos, width, height), resourceBar);
 	}
 
-	public override void SetBuilding(Building creator)
+	public override void SetBuildingId(int buildingId)
 	{
-		base.SetBuilding(creator);
-		resourceStore = creator;
+		base.SetBuildingId(buildingId);
+		resourceStoreId = buildingId;
 	}
 
-	public override void SaveDetails(JsonWriter writer)
+	public void SetBuilding()
 	{
-		base.SaveDetails(writer);
-		SaveManager.WriteBoolean(writer, "Harvesting", harvesting);
-		SaveManager.WriteBoolean(writer, "Emptying", emptying);
-		SaveManager.WriteFloat(writer, "CurrentLoad", currentLoad);
-		SaveManager.WriteFloat(writer, "CurrentDeposit", currentDeposit);
-		SaveManager.WriteString(writer, "HarvestType", harvestType.ToString());
-		if (resourceDeposit) SaveManager.WriteInt(writer, "ResourceDepositId", resourceDeposit.ObjectId);
-		if (resourceStore) SaveManager.WriteInt(writer, "ResourceStoreId", resourceStore.ObjectId);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
+		Building creator = PlayerManager.FindBuilding(playerId, resourceStoreId);
+		if (creator)
 		{
-			case "Harvesting": harvesting = (bool)readValue; break;
-			case "Emptying": emptying = (bool)readValue; break;
-			case "CurrentLoad": currentLoad = (float)(double)readValue; break;
-			case "CurrentDeposit": currentDeposit = (float)(double)readValue; break;
-			case "HarvestType": harvestType = WorkManager.GetResourceType((string)readValue); break;
-			case "ResourceDepositId": loadedDepositId = (int)(System.Int64)readValue; break;
-			case "ResourceStoreId": loadedStoreId = (int)(System.Int64)readValue; break;
-			default: break;
+			resourceStore = creator;
+			resourceStoreId = -1;
 		}
 	}
 
@@ -271,7 +249,7 @@ public class Harvester : Unit
 		else if (harvesting)
 		{
 			harvesting = false;
-			if (currentLoad > 0.0f)
+			if ((currentLoad > 0.0f) && (resourceStore))
 			{
 				//make sure that we have a whole number to avoid bugs
 				//caused by floating point numbers

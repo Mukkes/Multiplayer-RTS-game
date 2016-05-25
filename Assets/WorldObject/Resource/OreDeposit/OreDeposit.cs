@@ -3,8 +3,16 @@ using RTS;
 
 public class OreDeposit : Resource
 {
-
 	private int numBlocks;
+
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "OreDeposit";
+		maxHitPoints = 0;
+		cost = 0;
+		sellValue = 0;
+	}
 
 	protected override void Start()
 	{

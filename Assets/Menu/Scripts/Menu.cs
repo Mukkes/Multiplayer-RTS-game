@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using RTS;
 using System.Collections.Generic;
@@ -97,15 +98,14 @@ public class Menu : MonoBehaviour
 		Application.Quit();
 	}
 
-	protected void LoadGame()
+	protected NetworkManager GetNetworkManager()
 	{
-		HideCurrentMenu();
-		LoadMenu loadMenu = GetComponent<LoadMenu>();
-		if (loadMenu)
-		{
-			loadMenu.enabled = true;
-			loadMenu.Activate();
-		}
+		return GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
+	}
+
+	protected void StopNetworkGame()
+	{
+		GetNetworkManager().StopHost();
 	}
 
 	protected virtual void HideCurrentMenu()

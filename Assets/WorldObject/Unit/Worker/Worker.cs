@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using RTS;
+﻿using RTS;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -9,56 +8,62 @@ public class Worker : Unit
 	public float finishedJobVolume = 1.0f;
 	public int buildSpeed;
 
+	private int currentProjectId = -1;
 	private Building currentProject;
 	private bool building = false;
 	private float amountBuilt = 0.0f;
-	private int loadedProjectId = -1;
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
+
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "Worker";
+		hitPoints = 50;
+		maxHitPoints = 50;
+		cost = 50;
+		sellValue = 25;
+	}
 
 	protected override void Start()
 	{
 		base.Start();
 		actions = new string[] { "Refinery", "WarFactory", "Turrent", "Wonder" };
-		if (player && loadedSavedValues && loadedProjectId >= 0)
-		{
-			WorldObject obj = player.GetObjectForId(loadedProjectId);
-			if (obj.GetType().IsSubclassOf(typeof(Building))) currentProject = (Building)obj;
-		}
 	}
 
 	protected override void Update()
 	{
 		base.Update();
-		if (!moving && !rotating)
+		if ((currentProjectId >= 0) && (!currentProject))
 		{
-			if (building && currentProject && currentProject.UnderConstruction())
+			SetBuilding();
+		}
+		else if (!moving && !rotating)
+		{
+			if (building && currentProject)
 			{
-				amountBuilt += buildSpeed * Time.deltaTime;
-				int amount = Mathf.FloorToInt(amountBuilt);
-				if (amount > 0)
+				if (currentProject.UnderConstruction())
 				{
-					amountBuilt -= amount;
-					currentProject.Construct(amount);
-					if (!currentProject.UnderConstruction())
+					amountBuilt += buildSpeed * Time.deltaTime;
+					int amount = Mathf.FloorToInt(amountBuilt);
+					if (amount > 0)
 					{
-						if (audioElement != null) audioElement.Play(finishedJobSound);
-						building = false;
+						amountBuilt -= amount;
+						currentProject.Construct(amount);
 					}
+				}
+				else
+				{
+					if (audioElement != null) audioElement.Play(finishedJobSound);
+					building = false;
+					currentProjectId = -1;
+					currentProject = null;
 				}
 			}
 		}
 	}
 
 	/*** Public Methods ***/
-
-	public override void SetBuilding(Building project)
-	{
-		base.SetBuilding(project);
-		currentProject = project;
-		StartMove(currentProject.transform.position, currentProject.gameObject);
-		building = true;
-	}
 
 	public override void PerformAction(string actionToPerform)
 	{
@@ -76,45 +81,47 @@ public class Worker : Unit
 	private void CreateBuilding(string buildingName)
 	{
 		Vector3 buildPoint = new Vector3(transform.position.x, transform.position.y, transform.position.z + 10);
-		if (player) player.CreateBuilding(buildingName, buildPoint, this, playingArea);
+		int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
+		if (player) player.CreateBuilding(worldObjectId, buildingName, buildPoint, this, playingArea);
+	}
+
+	public override void SetBuildingId(int buildingId)
+	{
+		currentProjectId = buildingId;
+		currentProject = null;
+	}
+
+	private void SetBuilding()
+	{
+		Building building = PlayerManager.FindBuilding(playerId, currentProjectId);
+		if (building)
+		{
+			currentProject = building;
+			StartMove(currentProject.transform.position, currentProject.gameObject);
+			this.building = true;
+			currentProjectId = -1;
+		}
 	}
 
 	public override void MouseClick(GameObject hitObject, Vector3 hitPoint, Player controller)
 	{
 		bool doBase = true;
 		//only handle input if owned by a human player and currently selected
-		if (player && player.human && currentlySelected && !WorkManager.ObjectIsGround(hitObject))
+		if (player && player.human && player.isLocalPlayer && currentlySelected && !WorkManager.ObjectIsGround(hitObject))
 		{
 			Building building = hitObject.transform.parent.GetComponent<Building>();
 			if (building)
 			{
 				if (building.UnderConstruction())
 				{
-					SetBuilding(building);
+					SetBuildingId(building.id);
 					doBase = false;
 				}
 			}
 		}
-		if (doBase) base.MouseClick(hitObject, hitPoint, controller);
-	}
-
-	public override void SaveDetails(JsonWriter writer)
-	{
-		base.SaveDetails(writer);
-		SaveManager.WriteBoolean(writer, "Building", building);
-		SaveManager.WriteFloat(writer, "AmountBuilt", amountBuilt);
-		if (currentProject) SaveManager.WriteInt(writer, "CurrentProjectId", currentProject.ObjectId);
-	}
-
-	protected override void HandleLoadedProperty(JsonTextReader reader, string propertyName, object readValue)
-	{
-		base.HandleLoadedProperty(reader, propertyName, readValue);
-		switch (propertyName)
+		if (doBase)
 		{
-			case "Building": building = (bool)readValue; break;
-			case "AmountBuilt": amountBuilt = (float)(double)readValue; break;
-			case "CurrentProjectId": loadedProjectId = (int)(System.Int64)readValue; break;
-			default: break;
+			base.MouseClick(hitObject, hitPoint, controller);
 		}
 	}
 
@@ -150,7 +157,7 @@ public class Worker : Unit
 		if (nearestObject)
 		{
 			Building closestBuilding = nearestObject.GetComponent<Building>();
-			if (closestBuilding) SetBuilding(closestBuilding);
+			if (closestBuilding) SetBuildingId(closestBuilding.id);
 		}
 	}
 }

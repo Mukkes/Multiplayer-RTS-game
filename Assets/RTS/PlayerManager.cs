@@ -196,5 +196,109 @@ namespace RTS
 			}
 			return savedGames;
 		}
+
+		private static Color[] colors =
+		{
+			Color.red,
+			Color.blue,
+			Color.green,
+			Color.yellow
+		};
+
+		public static Color GetTeamColor(int id)
+		{
+			Color color = Color.black;
+
+			if (id < colors.Length)
+				color = colors[id];
+
+			return color;
+		}
+
+		private static int uniquePlayerId = 0;
+
+		public static int GetUniquePlayerId()
+		{
+			int id = uniquePlayerId;
+			uniquePlayerId++;
+			return id;
+		}
+
+		public static Player FindPlayer(int id)
+		{
+			foreach (GameObject gameObject in Object.FindObjectsOfType(typeof(GameObject)) as GameObject[])
+			{
+				Player player = gameObject.GetComponent<Player>();
+				if ((player != null) && (player.id == id))
+					return player;
+			}
+			return null;
+		}
+
+		private static Vector3[] spawnPoints =
+		{
+			new Vector3(-10, 0, 0),
+			new Vector3(10, 0, 0),
+			new Vector3(0, 0, 10),
+			new Vector3(0, 0, -10)
+		};
+
+		public static Vector3 GetSpawnPoint(int id)
+		{
+			Vector3 spawnPoint = new Vector3();
+
+			if (id < spawnPoints.Length)
+				spawnPoint = spawnPoints[id];
+
+			return spawnPoint;
+		}
+		
+		private static int uniqueWorldObjectId = 0;
+
+		public static int GetUniqueWorldObjectId()
+		{
+			int id = uniqueWorldObjectId;
+			uniqueWorldObjectId++;
+			return id;
+		}
+
+		public static Unit FindUnit(int playerId, int unitId)
+		{
+			Player player = FindPlayer(playerId);
+			if (player)
+			{
+				Units units = player.GetComponentInChildren<Units>();
+				foreach(Transform child in units.transform)
+				{
+					Unit unit = child.gameObject.GetComponent<Unit>();
+					if ((unit) && (unit.id == unitId))
+						return unit;
+				}
+			}
+			return null;
+		}
+
+		public static Building FindBuilding(int playerId, int buildingId)
+		{
+			foreach (GameObject gameObject in Object.FindObjectsOfType(typeof(GameObject)) as GameObject[])
+			{
+				Building building = gameObject.GetComponent<Building>();
+				if ((building != null) && (building.playerId == playerId) && (building.id == buildingId))
+					return building;
+			}
+
+			Player player = FindPlayer(playerId);
+			if (player)
+			{
+				Buildings buildings = player.GetComponentInChildren<Buildings>();
+				foreach (Transform child in buildings.transform)
+				{
+					Building building = child.gameObject.GetComponent<Building>();
+					if ((building) && (building.id == buildingId))
+						return building;
+				}
+			}
+			return null;
+		}
 	}
 }
