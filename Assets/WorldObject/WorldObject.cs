@@ -7,15 +7,18 @@ using UnityEngine.Networking;
 
 public abstract class WorldObject : NetworkBehaviour
 {
-
-	public string objectName;
-	public Texture2D buildImage;
-	public int cost, sellValue, hitPoints, maxHitPoints;
-	//public NetworkViewID playerId;
+	[SyncVar]
+	public int hitPoints;
 	[SyncVar]
 	public int id = -1;
 	[SyncVar]
 	public int playerId = -1;
+
+	public string objectName;
+	public Texture2D buildImage;
+	public int cost;
+	public int sellValue;
+	public int maxHitPoints;
 	public Player player;
 	public GameObject playerObject;
 	public float weaponRange = 10.0f;
@@ -63,12 +66,15 @@ public abstract class WorldObject : NetworkBehaviour
 	protected virtual void Update()
 	{
 		if (handleNetwork)
+		{
 			HandleNetwork();
-
-		if (ShouldMakeDecision()) DecideWhatToDo();
-		currentWeaponChargeTime += Time.deltaTime;
-		if (attacking && !movingIntoPosition && !aiming) PerformAttack();
-
+		}
+		else if (player.isLocalPlayer && player.human)
+		{
+			if (ShouldMakeDecision()) DecideWhatToDo();
+			currentWeaponChargeTime += Time.deltaTime;
+			if (attacking && !movingIntoPosition && !aiming) PerformAttack();
+		}
 		if (!isLocalPlayer)
 			CalculateBounds();
 	}
@@ -152,7 +158,7 @@ public abstract class WorldObject : NetworkBehaviour
 		worldObject.SetSelection(true, controller.hud.GetPlayingArea());
 	}
 
-	private void DrawSelection()
+	protected virtual void DrawSelection()
 	{
 		GUI.skin = ResourceManager.SelectBoxSkin;
 		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
@@ -169,6 +175,12 @@ public abstract class WorldObject : NetworkBehaviour
 		{
 			selectionBounds.Encapsulate(r.bounds);
 		}
+	}
+
+	[Command]
+	protected void CmdSetHitPoints(int hitPoints)
+	{
+		this.hitPoints = hitPoints;
 	}
 
 	protected virtual void DrawSelectionBox(Rect selectBox)

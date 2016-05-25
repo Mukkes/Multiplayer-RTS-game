@@ -12,6 +12,12 @@ public class Resource : WorldObject
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
 
+	protected override void Awake()
+	{
+		base.Awake();
+		hitPoints = 0;
+	}
+
 	protected override void Start()
 	{
 		base.Start();

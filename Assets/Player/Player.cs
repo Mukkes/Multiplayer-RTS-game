@@ -1,30 +1,32 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using RTS;
-using Newtonsoft.Json;
 using UnityEngine.Networking;
 
 public class Player : NetworkBehaviour
 {
+	[SyncVar]
+	public int id = -1;
+	[SyncVar]
+	private bool findingPlacement = false;
+	[SyncVar]
+	private int tempBuildingId = -1;
+	[SyncVar]
+	private int tempCreatorId = -1;
+
 	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
 	public string username;
 	public bool human;
 	public HUD hud;
 	public Material notAllowedMaterial, allowedMaterial;
 	public Color teamColor;
-	[SyncVar]
-	public int id = -1;
 	// Check if network things has been done.
 	public bool handleNetwork = true;
-
+	
 	private Dictionary<ResourceType, int> resources, resourceLimits;
-	private int tempBuildingId = -1;
 	private Building tempBuilding;
-	private int tempCreatorId = -1;
 	private Unit tempCreator;
-	private bool findingPlacement = false;
-
+	
 	public WorldObject SelectedObject
 	{
 		get;
@@ -84,25 +86,23 @@ public class Player : NetworkBehaviour
 
 	private void SetTempBuilding()
 	{
-		Debug.Log("Player: find tempBuilding. playerId: " + id + " buldingId: " + tempBuildingId);
 		Building building = PlayerManager.FindBuilding(id, tempBuildingId);
 		if (building)
 		{
 			tempBuilding = building;
 			tempBuildingId = -1;
-			Debug.Log("Player: tempBuilding is set.");
+			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
+			tempBuilding.SetColliders(false);
 		}
 	}
 
 	private void SetTempCreator()
 	{
-		Debug.Log("Player: find tempCreator. playerId: " + id + " unitId: " + tempCreatorId);
 		Unit unit = PlayerManager.FindUnit(id, tempCreatorId);
 		if (unit)
 		{
 			tempCreator = unit;
 			tempCreatorId = -1;
-			Debug.Log("Player: tempCreator is set.");
 		}
 	}
 
@@ -124,6 +124,12 @@ public class Player : NetworkBehaviour
 	{
 		AddResource(ResourceType.Money, startMoney);
 		AddResource(ResourceType.Power, startPower);
+	}
+
+	[Command]
+	private void CmdSetFindingPlacement(bool findingPlacement)
+	{
+		this.findingPlacement = findingPlacement;
 	}
 
 	public void SetId(int id)
@@ -169,6 +175,7 @@ public class Player : NetworkBehaviour
 
 	public void CreateBuilding(int buildingId, string buildingName, Vector3 buildPoint, Unit creator, Rect playingArea)
 	{
+		if (findingPlacement) CancelBuildingPlacement();
 		CmdCreateBuilding(buildingId, buildingName, buildPoint, creator.id, playingArea);
 	}
 
@@ -185,8 +192,7 @@ public class Player : NetworkBehaviour
 			tempBuilding.SetId(buildingId);
 			tempBuilding.SetPlayerId(id);
 			tempBuilding.hitPoints = 0;
-			tempBuilding.SetTransparentMaterial(notAllowedMaterial, true);
-			tempBuilding.SetColliders(false);
+			tempBuilding.SetColliders(true);
 			tempBuilding.SetPlayingArea(playingArea);
 			NetworkServer.SpawnWithClientAuthority(newBuilding, connectionToClient);
 		}
@@ -207,8 +213,6 @@ public class Player : NetworkBehaviour
 
 	public bool CanPlaceBuilding()
 	{
-		bool canPlace = true;
-
 		Bounds placeBounds = tempBuilding.GetSelectionBounds();
 		//shorthand for the coordinates of the center of the selection bounds
 		float cx = placeBounds.center.x;
@@ -236,15 +240,18 @@ public class Player : NetworkBehaviour
 			if (hitObject && !WorkManager.ObjectIsGround(hitObject))
 			{
 				WorldObject worldObject = hitObject.transform.parent.GetComponent<WorldObject>();
-				if (worldObject && placeBounds.Intersects(worldObject.GetSelectionBounds())) canPlace = false;
+				if (worldObject && placeBounds.Intersects(worldObject.GetSelectionBounds()))
+				{
+					return false;
+				}
 			}
 		}
-		return canPlace;
+		return true;
 	}
 
 	public void StartConstruction()
 	{
-		findingPlacement = false;
+		CmdSetFindingPlacement(false);
 		tempBuilding.SetColliders(true);
 		tempCreator.SetBuildingId(tempBuilding.id);
 		tempBuilding.StartConstruction();
@@ -255,12 +262,18 @@ public class Player : NetworkBehaviour
 
 	public void CancelBuildingPlacement()
 	{
-		findingPlacement = false;
-		Destroy(tempBuilding.gameObject);
+		CmdSetFindingPlacement(false);
+		CmdDestroy(tempBuilding.gameObject);
 		tempBuildingId = -1;
 		tempBuilding = null;
 		tempCreatorId = -1;
 		tempCreator = null;
+	}
+
+	[Command]
+	public void CmdDestroy(GameObject gameObject)
+	{
+		NetworkServer.Destroy(gameObject);
 	}
 	
 	public bool IsDead()

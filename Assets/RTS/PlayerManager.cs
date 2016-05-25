@@ -293,7 +293,6 @@ namespace RTS
 				Buildings buildings = player.GetComponentInChildren<Buildings>();
 				foreach (Transform child in buildings.transform)
 				{
-					Debug.Log("A child.");
 					Building building = child.gameObject.GetComponent<Building>();
 					if ((building) && (building.id == buildingId))
 						return building;

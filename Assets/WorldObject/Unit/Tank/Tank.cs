@@ -7,6 +7,16 @@ public class Tank : Unit {
 
 	private Quaternion aimRotation;
 
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "Tank";
+		hitPoints = 150;
+		maxHitPoints = 150;
+		cost = 150;
+		sellValue = 75;
+	}
+
 	// Use this for initialization
 	protected override void Start () {
 		base.Start();

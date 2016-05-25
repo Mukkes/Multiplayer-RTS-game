@@ -21,6 +21,16 @@ public class Harvester : Unit
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
 
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "Harvester";
+		hitPoints = 100;
+		maxHitPoints = 100;
+		cost = 100;
+		sellValue = 50;
+	}
+
 	protected override void Start()
 	{
 		base.Start();
@@ -192,7 +202,6 @@ public class Harvester : Unit
 		{
 			resourceStore = creator;
 			resourceStoreId = -1;
-			Debug.Log("Harvester: resourceStore is set.");
 		}
 	}
 

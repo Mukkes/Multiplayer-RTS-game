@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using RTS;
+﻿using RTS;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -16,6 +15,16 @@ public class Worker : Unit
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
 
+	protected override void Awake()
+	{
+		base.Awake();
+		objectName = "Worker";
+		hitPoints = 50;
+		maxHitPoints = 50;
+		cost = 50;
+		sellValue = 25;
+	}
+
 	protected override void Start()
 	{
 		base.Start();
@@ -31,19 +40,24 @@ public class Worker : Unit
 		}
 		else if (!moving && !rotating)
 		{
-			if (building && currentProject && currentProject.UnderConstruction())
+			if (building && currentProject)
 			{
-				amountBuilt += buildSpeed * Time.deltaTime;
-				int amount = Mathf.FloorToInt(amountBuilt);
-				if (amount > 0)
+				if (currentProject.UnderConstruction())
 				{
-					amountBuilt -= amount;
-					currentProject.Construct(amount);
-					if (!currentProject.UnderConstruction())
+					amountBuilt += buildSpeed * Time.deltaTime;
+					int amount = Mathf.FloorToInt(amountBuilt);
+					if (amount > 0)
 					{
-						if (audioElement != null) audioElement.Play(finishedJobSound);
-						building = false;
+						amountBuilt -= amount;
+						currentProject.Construct(amount);
 					}
+				}
+				else
+				{
+					if (audioElement != null) audioElement.Play(finishedJobSound);
+					building = false;
+					currentProjectId = -1;
+					currentProject = null;
 				}
 			}
 		}
@@ -74,6 +88,7 @@ public class Worker : Unit
 	public override void SetBuildingId(int buildingId)
 	{
 		currentProjectId = buildingId;
+		currentProject = null;
 	}
 
 	private void SetBuilding()
@@ -85,7 +100,6 @@ public class Worker : Unit
 			StartMove(currentProject.transform.position, currentProject.gameObject);
 			this.building = true;
 			currentProjectId = -1;
-			Debug.Log("Worker: currentProject is set.");
 		}
 	}
 
@@ -105,7 +119,10 @@ public class Worker : Unit
 				}
 			}
 		}
-		if (doBase) base.MouseClick(hitObject, hitPoint, controller);
+		if (doBase)
+		{
+			base.MouseClick(hitObject, hitPoint, controller);
+		}
 	}
 
 	protected override void InitialiseAudio()

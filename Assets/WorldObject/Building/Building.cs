@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using RTS;
-using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 public class Building : WorldObject
 {
+	[SyncVar]
+	private bool needsBuilding = false;
+	
 	public AudioClip finishedJobSound;
 	public float finishedJobVolume = 1.0f;
 	public Texture2D rallyPointImage;
@@ -15,7 +17,6 @@ public class Building : WorldObject
 	protected Queue<string> buildQueue;
 	protected Vector3 rallyPoint;
 
-	private bool needsBuilding = false;
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
 
@@ -27,6 +28,7 @@ public class Building : WorldObject
 		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
 		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
 		rallyPoint = spawnPoint;
+		hitPoints = 0;
 	}
 
 	protected override void Start()
@@ -40,9 +42,9 @@ public class Building : WorldObject
 		ProcessBuildQueue();
 	}
 
-	protected override void OnGUI()
+	protected override void DrawSelection()
 	{
-		base.OnGUI();
+		base.DrawSelection();
 		if (needsBuilding) DrawBuildProgress();
 	}
 	
@@ -55,6 +57,12 @@ public class Building : WorldObject
 		CalculateCurrentHealth(0.5f, 0.99f);
 		DrawHealthBar(selectBox, "Building ...");
 		GUI.EndGroup();
+	}
+
+	[Command]
+	private void CmdSetNeedsBuilding(bool needsBuilding)
+	{
+		this.needsBuilding = needsBuilding;
 	}
 
 	protected void CreateUnit(string unitName)
@@ -183,7 +191,7 @@ public class Building : WorldObject
 	public void StartConstruction()
 	{
 		CalculateBounds();
-		needsBuilding = true;
+		CmdSetNeedsBuilding(true);
 		hitPoints = 0;
 	}
 
@@ -194,11 +202,11 @@ public class Building : WorldObject
 
 	public void Construct(int amount)
 	{
-		hitPoints += amount;
+		CmdSetHitPoints(hitPoints + amount);
 		if (hitPoints >= maxHitPoints)
 		{
-			hitPoints = maxHitPoints;
-			needsBuilding = false;
+			CmdSetHitPoints(maxHitPoints);
+			CmdSetNeedsBuilding(false);
 			RestoreMaterials();
 			SetTeamColor();
 		}
