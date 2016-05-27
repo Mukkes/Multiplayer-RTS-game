@@ -188,7 +188,7 @@ public class UserInput : MonoBehaviour
 						{
 							Unit unit = hoverObject.transform.parent.GetComponent<Unit>();
 							Building building = hoverObject.transform.parent.GetComponent<Building>();
-							if (owner.username == player.username && (unit || building)) player.hud.SetCursorState(CursorState.Select);
+							if (owner.id == player.id && (unit || building)) player.hud.SetCursorState(CursorState.Select);
 						}
 					}
 				}

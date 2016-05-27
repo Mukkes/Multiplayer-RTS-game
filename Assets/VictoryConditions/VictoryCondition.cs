@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using UnityEngine.Networking;
 
-public abstract class VictoryCondition : MonoBehaviour
+public abstract class VictoryCondition : NetworkBehaviour
 {
 
 	protected Player[] players;

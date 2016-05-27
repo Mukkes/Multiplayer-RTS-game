@@ -7,6 +7,8 @@ public class Building : WorldObject
 {
 	[SyncVar]
 	private bool needsBuilding = false;
+	[SyncVar]
+	public bool isTempBuilding = true;
 	
 	public AudioClip finishedJobSound;
 	public float finishedJobVolume = 1.0f;
@@ -207,6 +209,7 @@ public class Building : WorldObject
 		{
 			CmdSetHitPoints(maxHitPoints);
 			CmdSetNeedsBuilding(false);
+			CmdSetIsTempBuilding(false);
 			RestoreMaterials();
 			SetTeamColor();
 		}
@@ -216,5 +219,11 @@ public class Building : WorldObject
 	{
 		Buildings buildings = player.GetComponentInChildren<Buildings>();
 		transform.parent = buildings.transform;
+	}
+
+	[Command]
+	public void CmdSetIsTempBuilding(bool isTempBuilding)
+	{
+		this.isTempBuilding = isTempBuilding;
 	}
 }

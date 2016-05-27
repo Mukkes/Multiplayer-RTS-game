@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class EscortConvoy : VictoryCondition
 {
-
 	public Vector3 destination = new Vector3(0.0f, 0.0f, 0.0f);
 	public Texture2D highlight;
 
