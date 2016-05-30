@@ -106,19 +106,32 @@ public class HUD : MonoBehaviour
 		GUI.skin = ordersSkin;
 		GUI.BeginGroup(new Rect(Screen.width - ORDERS_BAR_WIDTH - BUILD_IMAGE_WIDTH, RESOURCE_BAR_HEIGHT, ORDERS_BAR_WIDTH + BUILD_IMAGE_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT));
 		GUI.Box(new Rect(BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH, 0, ORDERS_BAR_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT), "");
+		WorldObject worldObject = player.SelectedObject;
 
 		string selectionName = "";
-		if (player.SelectedObject)
+		if (worldObject)
 		{
-			selectionName = player.SelectedObject.objectName;
+			selectionName = worldObject.objectName;
 
-			if (player.SelectedObject.IsOwnedBy(player))
+			if (worldObject.IsOwnedBy(player))
 			{
 				//reset slider value if the selected object has changed
-				if (lastSelection && lastSelection != player.SelectedObject) sliderValue = 0.0f;
-				DrawActions(player.SelectedObject.GetActions());
+				if (lastSelection && lastSelection != worldObject) sliderValue = 0.0f;
+
+				if (worldObject is Building)
+				{
+					Building building = (Building)worldObject;
+					if ((!building.UnderConstruction()) && (!building.isTempBuilding))
+					{
+						DrawActions(worldObject.GetActions());
+					}
+				}
+				else
+				{
+					DrawActions(worldObject.GetActions());
+				}
 				//store the current selection
-				lastSelection = player.SelectedObject;
+				lastSelection = worldObject;
 
 				Building selectedBuilding = lastSelection.GetComponent<Building>();
 				if (selectedBuilding)
