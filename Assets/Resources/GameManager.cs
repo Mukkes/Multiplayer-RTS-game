@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 using RTS;
+using UnityEngine.Networking;
 
 /**
  * Singleton that handles the management of game state. This includes
  * detecting when a game has been finished and what to do from there.
  */
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
 
 	private static bool created = false;
 	private bool initialised = false;
-	public VictoryCondition[] victoryConditions;
-	public Player[] players;
+	private VictoryCondition[] victoryConditions;
+	private Player[] players;
 	private HUD hud;
 
 	void Awake()
 	{
+		PlayerManager.Reset();
+		
 		if (!created)
 		{
 			DontDestroyOnLoad(transform.gameObject);

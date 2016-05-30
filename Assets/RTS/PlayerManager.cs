@@ -300,5 +300,11 @@ namespace RTS
 			}
 			return null;
 		}
+
+		public static void Reset()
+		{
+			uniqueWorldObjectId = 0;
+			uniquePlayerId = 0;
+		}
 	}
 }
