@@ -17,19 +17,16 @@ public class Building : WorldObject
 	public Texture2D sellImage;
 	
 	protected Queue<string> buildQueue;
-	protected Vector3 rallyPoint;
+	public Vector3 rallyPoint;
 
 	private float currentBuildProgress = 0.0f;
-	private Vector3 spawnPoint;
+	public Vector3 spawnPoint;
 
 	protected override void Awake()
 	{
 		base.Awake();
 		buildQueue = new Queue<string>();
-		float spawnX = selectionBounds.center.x + transform.forward.x * selectionBounds.extents.x + transform.forward.x * 10;
-		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
-		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
-		rallyPoint = spawnPoint;
+		SetStartAndRallyPoint();
 		hitPoints = 0;
 	}
 
@@ -48,6 +45,14 @@ public class Building : WorldObject
 	{
 		base.DrawSelection();
 		if (needsBuilding) DrawBuildProgress();
+	}
+
+	private void SetStartAndRallyPoint()
+	{
+		float spawnX = selectionBounds.center.x + transform.forward.x * selectionBounds.extents.x + transform.forward.x * 10;
+		float spawnZ = selectionBounds.center.z + transform.forward.z + selectionBounds.extents.z + transform.forward.z * 10;
+		spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
+		rallyPoint = spawnPoint;
 	}
 	
 	private void DrawBuildProgress()
@@ -193,6 +198,7 @@ public class Building : WorldObject
 	public void StartConstruction()
 	{
 		CalculateBounds();
+		SetStartAndRallyPoint();
 		CmdSetNeedsBuilding(true);
 		hitPoints = 0;
 	}
