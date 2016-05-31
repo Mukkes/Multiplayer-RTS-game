@@ -109,7 +109,6 @@ public class HUD : MonoBehaviour
 		GUI.Box(new Rect(0, 0, Screen.width, Screen.height ), "");
         // de construction que moet nog omhoog ipv naar benede
         // er hoeft geen skin achter, ik wil alleen button, misschien kan dit met ui components ipv dit.
-        //
 		string selectionName = "";
 		if (player.SelectedObject)
 		{
