@@ -40,10 +40,13 @@ public class HUD : MonoBehaviour
 	private CursorState previousCursorState;
 	private AudioElement audioElement;
 
-	// Use this for initialization
-	void Start()
+    private Camera miniMap;
+
+    // Use this for initialization
+    void Start()
 	{
-		resourceValues = new Dictionary<ResourceType, int>();
+        miniMap = GameObject.FindWithTag("MiniMapCamera").GetComponent<Camera>();
+        resourceValues = new Dictionary<ResourceType, int>();
 		resourceLimits = new Dictionary<ResourceType, int>();
 		player = transform.root.GetComponent<Player>();
 		ResourceManager.StoreSelectBoxItems(selectBoxSkin, healthy, damaged, critical);
@@ -104,9 +107,10 @@ public class HUD : MonoBehaviour
 
 	private void DrawOrdersBar()
 	{
-		GUI.skin = ordersSkin;
-		GUI.BeginGroup(new Rect(0  , 0 + Screen.height - ORDERS_BAR_HEIGHT, Screen.width, 150));
-		GUI.Box(new Rect(0, 0, Screen.width, Screen.height ), "");
+        GUI.skin = ordersSkin;
+        //hier even de breedte ophalen van de camera(als dta kan)
+		GUI.BeginGroup(new Rect(0 - miniMap.pixelWidth  , 0 + Screen.height - ORDERS_BAR_HEIGHT, Screen.width, ORDERS_BAR_HEIGHT));
+		GUI.Box(new Rect(0 - miniMap.pixelWidth , 0 + Screen.height - ORDERS_BAR_HEIGHT, Screen.width, ORDERS_BAR_HEIGHT), "");
         // de construction que moet nog omhoog ipv naar benede
         // er hoeft geen skin achter, ik wil alleen button, misschien kan dit met ui components ipv dit.
 		string selectionName = "";
