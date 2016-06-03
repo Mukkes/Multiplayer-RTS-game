@@ -7,7 +7,7 @@ public class Resource : WorldObject
 	public float capacity;
 
 	//Variables accessible by subclass
-	protected float amountLeft;
+	public float amountLeft;
 	protected ResourceType resourceType;
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
@@ -27,10 +27,11 @@ public class Resource : WorldObject
 
 	/*** Public methods ***/
 
+	// Resource kunnen niet meer uitgeput raken omdat dit erg lastig was om voorelkaar te krijgen over het netwerk.
 	public void Remove(float amount)
 	{
-		amountLeft -= amount;
-		if (amountLeft < 0) amountLeft = 0;
+		//amountLeft -= amount;
+		//if (amountLeft < 0) amountLeft = 0;
 	}
 
 	public bool isEmpty()

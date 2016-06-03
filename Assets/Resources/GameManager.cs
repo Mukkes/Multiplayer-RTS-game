@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using RTS;
-using UnityEngine.Networking;
 
 /**
  * Singleton that handles the management of game state. This includes
  * detecting when a game has been finished and what to do from there.
  */
 
-public class GameManager : NetworkBehaviour
+public class GameManager : MonoBehaviour
 {
 
 	private static bool created = false;
@@ -51,7 +50,7 @@ public class GameManager : NetworkBehaviour
 			if (player.isLocalPlayer && player.human) hud = player.GetComponentInChildren<HUD>();
 		}
 		victoryConditions = FindObjectsOfType(typeof(VictoryCondition)) as VictoryCondition[];
-		if ((victoryConditions != null) && (players.Length > 1))
+		if ((victoryConditions != null))
 		{
 			foreach (VictoryCondition victoryCondition in victoryConditions)
 			{
@@ -64,7 +63,7 @@ public class GameManager : NetworkBehaviour
 	{
 		UpdatePlayers();
 
-		if ((victoryConditions != null) && (players.Length > 1))
+		if ((victoryConditions != null) && (players.Length > 1) && (Time.fixedTime > 1))
 		{
 			foreach (VictoryCondition victoryCondition in victoryConditions)
 			{
