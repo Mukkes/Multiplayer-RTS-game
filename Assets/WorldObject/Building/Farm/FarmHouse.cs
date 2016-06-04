@@ -10,6 +10,7 @@ public class FarmHouse : Building
         actions = new string[] { "Farm" };
     }
 
+    /*
     public override void PerformAction(string actionToPerform)
     {
         base.PerformAction(actionToPerform);
@@ -26,5 +27,5 @@ public class FarmHouse : Building
     protected override bool ShouldMakeDecision()
     {
         return false;
-    }
+    }*/
 }
