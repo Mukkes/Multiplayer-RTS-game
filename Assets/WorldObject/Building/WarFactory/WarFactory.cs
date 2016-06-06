@@ -7,7 +7,8 @@ public class WarFactory : Building
 	{
 		base.Awake();
 		objectName = "WarFactory";
-		maxHitPoints = 100;
+		//maxHitPoints = 100;
+		maxHitPoints = 5;
 		cost = 250;
 		sellValue = 125;
 	}

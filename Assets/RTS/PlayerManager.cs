@@ -301,6 +301,17 @@ namespace RTS
 			return null;
 		}
 
+		public static WorldObject FindWorldObject(int playerId, int id)
+		{
+			foreach (GameObject gameObject in Object.FindObjectsOfType(typeof(GameObject)) as GameObject[])
+			{
+				WorldObject worldObject = gameObject.GetComponent<WorldObject>();
+				if ((worldObject != null) && (worldObject.playerId == playerId) && (worldObject.id == id))
+					return worldObject;
+			}
+			return null;
+		}
+
 		public static void Reset()
 		{
 			uniqueWorldObjectId = 0;
