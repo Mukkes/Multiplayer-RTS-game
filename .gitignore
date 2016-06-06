@@ -36,3 +36,7 @@ sysinfo.txt
 # Git
 .gitignore~
 .gitignore.swp
+
+*.exe
+Game_Data/
+*.pdb

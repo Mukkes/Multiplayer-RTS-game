@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using RTS;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
 
 public class ResultsScreen : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class ResultsScreen : MonoBehaviour
 		GUI.Label(new Rect(leftPos, topPos, Screen.width - 2 * padding, itemHeight), message);
 		leftPos = Screen.width / 2 - padding / 2 - buttonWidth;
 		topPos += itemHeight + padding;
-		if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "New Game"))
+		/*if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "New Game"))
 		{
 			PlayClick();
 			//makes sure that the loaded level runs at normal speed
@@ -49,9 +50,10 @@ public class ResultsScreen : MonoBehaviour
 			ResourceManager.MenuOpen = false;
 			SceneManager.LoadScene("Map");
 		}
-		leftPos += padding + buttonWidth;
+		leftPos += padding + buttonWidth;*/
 		if (GUI.Button(new Rect(leftPos, topPos, buttonWidth, itemHeight), "Main Menu"))
 		{
+			StopNetworkGame();
 			ResourceManager.LevelName = "";
 			SceneManager.LoadScene("MainMenu");
 			Cursor.visible = true;
@@ -70,5 +72,15 @@ public class ResultsScreen : MonoBehaviour
 		if (!victoryCondition) return;
 		metVictoryCondition = victoryCondition;
 		winner = metVictoryCondition.GetWinner();
+	}
+	
+	private NetworkManager GetNetworkManager()
+	{
+		return GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
+	}
+
+	private void StopNetworkGame()
+	{
+		GetNetworkManager().StopHost();
 	}
 }

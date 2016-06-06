@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using RTS;
 
 /**
@@ -13,10 +12,13 @@ public class GameManager : MonoBehaviour
 	private static bool created = false;
 	private bool initialised = false;
 	private VictoryCondition[] victoryConditions;
+	private Player[] players;
 	private HUD hud;
 
 	void Awake()
 	{
+		PlayerManager.Reset();
+		
 		if (!created)
 		{
 			DontDestroyOnLoad(transform.gameObject);
@@ -42,13 +44,13 @@ public class GameManager : MonoBehaviour
 
 	private void LoadDetails()
 	{
-		Player[] players = GameObject.FindObjectsOfType(typeof(Player)) as Player[];
+		players = FindObjectsOfType(typeof(Player)) as Player[];
 		foreach (Player player in players)
 		{
-			if (player.human) hud = player.GetComponentInChildren<HUD>();
+			if (player.isLocalPlayer && player.human) hud = player.GetComponentInChildren<HUD>();
 		}
-		victoryConditions = GameObject.FindObjectsOfType(typeof(VictoryCondition)) as VictoryCondition[];
-		if (victoryConditions != null)
+		victoryConditions = FindObjectsOfType(typeof(VictoryCondition)) as VictoryCondition[];
+		if ((victoryConditions != null))
 		{
 			foreach (VictoryCondition victoryCondition in victoryConditions)
 			{
@@ -59,12 +61,16 @@ public class GameManager : MonoBehaviour
 
 	void Update()
 	{
-		if (victoryConditions != null)
+		UpdatePlayers();
+
+		if ((victoryConditions != null) && (players.Length > 1) && (Time.fixedTime > 1))
 		{
 			foreach (VictoryCondition victoryCondition in victoryConditions)
 			{
 				if (victoryCondition.GameFinished())
 				{
+					PauseMenu pauseMenu = hud.GetComponent<PauseMenu>();
+					if (pauseMenu) pauseMenu.enabled = false;
 					ResultsScreen resultsScreen = hud.GetComponent<ResultsScreen>();
 					resultsScreen.SetMetVictoryCondition(victoryCondition);
 					resultsScreen.enabled = true;
@@ -74,6 +80,15 @@ public class GameManager : MonoBehaviour
 					hud.enabled = false;
 				}
 			}
+		}
+	}
+
+	private void UpdatePlayers()
+	{
+		Player[] players = FindObjectsOfType(typeof(Player)) as Player[];
+		if (this.players.Length != players.Length)
+		{
+			LoadDetails();
 		}
 	}
 

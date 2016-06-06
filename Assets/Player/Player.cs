@@ -13,9 +13,10 @@ public class Player : NetworkBehaviour
 	private int tempBuildingId = -1;
 	[SyncVar]
 	private int tempCreatorId = -1;
+	[SyncVar]
+	public string username;
 
 	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
-	public string username;
 	public bool human;
 	public HUD hud;
 	public Material notAllowedMaterial, allowedMaterial;
@@ -47,6 +48,10 @@ public class Player : NetworkBehaviour
 		hud = GetComponentInChildren<HUD>();
 		AddStartResourceLimits();
 		AddStartResources();
+		if (isLocalPlayer)
+		{
+			CmdSetUsername(PlayerManager.GetPlayerName());
+		}
 	}
 
 	// Update is called once per frame
@@ -130,6 +135,12 @@ public class Player : NetworkBehaviour
 	private void CmdSetFindingPlacement(bool findingPlacement)
 	{
 		this.findingPlacement = findingPlacement;
+	}
+
+	[Command]
+	private void CmdSetUsername(string username)
+	{
+		this.username = username;
 	}
 
 	public void SetId(int id)
@@ -251,6 +262,7 @@ public class Player : NetworkBehaviour
 
 	public void StartConstruction()
 	{
+		findingPlacement = false;
 		CmdSetFindingPlacement(false);
 		tempBuilding.SetColliders(true);
 		tempCreator.SetBuildingId(tempBuilding.id);
@@ -262,6 +274,7 @@ public class Player : NetworkBehaviour
 
 	public void CancelBuildingPlacement()
 	{
+		findingPlacement = false;
 		CmdSetFindingPlacement(false);
 		CmdDestroy(tempBuilding.gameObject);
 		tempBuildingId = -1;
@@ -293,5 +306,10 @@ public class Player : NetworkBehaviour
 	public void RemoveResource(ResourceType type, int amount)
 	{
 		resources[type] -= amount;
+	}
+
+	public Building GetTempBuilding()
+	{
+		return tempBuilding;
 	}
 }

@@ -133,12 +133,20 @@ public abstract class WorldObject : NetworkBehaviour
 				if (resource && resource.isEmpty()) return;
 				Player owner = hitObject.transform.root.GetComponent<Player>();
 				if (owner)
-				{ //the object is controlled by a player
+				{
+					//the object is controlled by a player
 					if (player && player.human && player.isLocalPlayer)
-					{ //this object is controlled by a human player
-					  //start attack if object is not owned by the same player and this object can attack, else select
-						if (player.username != owner.username && CanAttack()) BeginAttack(worldObject);
-						else ChangeSelection(worldObject, controller);
+					{
+						//this object is controlled by a human player
+						//start attack if object is not owned by the same player and this object can attack, else select
+						if (player.id != owner.id && CanAttack())
+						{
+							BeginAttack(worldObject);
+						}
+						else
+						{
+							ChangeSelection(worldObject, controller);
+						}
 					}
 					else ChangeSelection(worldObject, controller);
 				}
@@ -216,7 +224,7 @@ public abstract class WorldObject : NetworkBehaviour
 				Building building = hoverObject.transform.parent.GetComponent<Building>();
 				if (owner)
 				{ //the object is owned by a player
-					if (owner.username == player.username) player.hud.SetCursorState(CursorState.Select);
+					if (owner.id == player.id) player.hud.SetCursorState(CursorState.Select);
 					else if (CanAttack()) player.hud.SetCursorState(CursorState.Attack);
 					else player.hud.SetCursorState(CursorState.Select);
 				}
