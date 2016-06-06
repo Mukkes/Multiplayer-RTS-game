@@ -23,7 +23,6 @@ public class Worker : Unit
 		maxHitPoints = 50;
 		cost = 50;
 		sellValue = 25;
-		// prefab moveSpeed = 3, rotateSpeed = 2;
 	}
 
 	protected override void Start()
