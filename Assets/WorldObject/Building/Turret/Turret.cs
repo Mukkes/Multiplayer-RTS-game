@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RTS;
+using UnityEngine.Networking;
 
 public class Turret : Building
 {
@@ -46,6 +47,18 @@ public class Turret : Building
 	protected override void UseWeapon()
 	{
 		base.UseWeapon();
+		CmdCreateProjectile(target.playerId, target.id);
+	}
+
+	protected override void AimAtTarget()
+	{
+		base.AimAtTarget();
+		aimRotation = Quaternion.LookRotation(target.transform.position - transform.position);
+	}
+
+	[Command]
+	private void CmdCreateProjectile(int targetPlayerId, int targetId)
+	{
 		Vector3 spawnPoint = transform.position;
 		spawnPoint.x += (2.6f * transform.forward.x);
 		spawnPoint.y += 1.0f;
@@ -53,12 +66,7 @@ public class Turret : Building
 		GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TurrentProjectile"), spawnPoint, transform.rotation);
 		Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
 		projectile.SetRange(0.9f * weaponRange);
-		projectile.SetTarget(target);
-	}
-
-	protected override void AimAtTarget()
-	{
-		base.AimAtTarget();
-		aimRotation = Quaternion.LookRotation(target.transform.position - transform.position);
+		projectile.SetTarget(targetPlayerId, targetId);
+		NetworkServer.Spawn(gameObject);
 	}
 }

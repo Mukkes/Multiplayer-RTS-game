@@ -2,6 +2,7 @@
 using System.Collections;
 using RTS;
 using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 public class Tank : Unit {
 
@@ -52,6 +53,12 @@ public class Tank : Unit {
 	protected override void UseWeapon()
 	{
 		base.UseWeapon();
+		CmdCreateProjectile(target.playerId, target.id);
+	}
+
+	[Command]
+	private void CmdCreateProjectile(int targetPlayerId, int targetId)
+	{
 		Vector3 spawnPoint = transform.position;
 		spawnPoint.x += (2.1f * transform.forward.x);
 		spawnPoint.y += 1.4f;
@@ -59,6 +66,7 @@ public class Tank : Unit {
 		GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TankProjectile"), spawnPoint, transform.rotation);
 		Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
 		projectile.SetRange(0.9f * weaponRange);
-		projectile.SetTarget(target);
+		projectile.SetTarget(targetPlayerId, targetId);
+		NetworkServer.Spawn(gameObject);
 	}
 }
