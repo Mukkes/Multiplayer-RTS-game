@@ -2,13 +2,12 @@
 using RTS;
 using System.Collections.Generic;
 using UnityEngine.Networking;
+using System;
 
 public class Harvester : Unit
 {
 
 	public float capacity;
-	public int resourceStoreId = -1;
-	public Building resourceStore;
 	public float collectionAmount, depositAmount;
 	public AudioClip emptyHarvestSound, harvestSound, startHarvestSound;
 	public float emptyHarvestVolume = 0.5f, harvestVolume = 0.5f, startHarvestVolume = 1.0f;
@@ -40,41 +39,24 @@ public class Harvester : Unit
 	protected override void Update()
 	{
 		base.Update();
-		if ((resourceStoreId >= 0) && (!resourceStore))
-		{
-			SetBuilding();
-		}
-		else if (!rotating && !moving)
+		if (!rotating && !moving)
 		{
 			if (harvesting || emptying)
 			{
-				Arms[] arms = GetComponentsInChildren<Arms>();
-				foreach (Arms arm in arms) arm.GetComponent<Renderer>().enabled = true;
+				EnableArms(true);
 				if (harvesting)
 				{
 					Collect();
-					if ((currentLoad >= capacity) && (resourceStore))
+					if (IsFull())
 					{
-						//make sure that we have a whole number to avoid bugs
-						//caused by floating point numbers
-						currentLoad = Mathf.Floor(currentLoad);
-						harvesting = false;
-						emptying = true;
-						foreach (Arms arm in arms) arm.GetComponent<Renderer>().enabled = false;
-						StartMove(resourceStore.transform.position, resourceStore.gameObject);
+						StopHarvest();
 					}
 				}
 				else {
 					Deposit();
 					if (currentLoad <= 0)
 					{
-						emptying = false;
-						foreach (Arms arm in arms) arm.GetComponent<Renderer>().enabled = false;
-						if (!resourceDeposit.isEmpty())
-						{
-							harvesting = true;
-							StartMove(resourceDeposit.transform.position, resourceDeposit.gameObject);
-						}
+						StopEmptying();
 					}
 				}
 			}
@@ -99,6 +81,8 @@ public class Harvester : Unit
 
 	public override void MouseClick(GameObject hitObject, Vector3 hitPoint, Player controller)
 	{
+		StopHarvest();
+		StopEmptying();
 		base.MouseClick(hitObject, hitPoint, controller);
 		//only handle input if owned by a human player
 		if (player && player.human && player.isLocalPlayer)
@@ -121,6 +105,11 @@ public class Harvester : Unit
 
 	/* Private Methods */
 
+	private bool IsFull()
+	{
+		return currentLoad >= capacity;
+	}
+
 	private void StartHarvest(Resource resource)
 	{
 		if (audioElement != null) audioElement.Play(startHarvestSound);
@@ -138,7 +127,21 @@ public class Harvester : Unit
 
 	private void StopHarvest()
 	{
+		//make sure that we have a whole number to avoid bugs
+		//caused by floating point numbers
+		currentLoad = Mathf.Floor(currentLoad);
+		harvesting = false;
+		EnableArms(false);
+		if (audioElement != null && Time.timeScale > 0)
+			audioElement.Stop(harvestSound);
+	}
 
+	private void StopEmptying()
+	{
+		emptying = false;
+		EnableArms(false);
+		if (audioElement != null && Time.timeScale > 0)
+			audioElement.Stop(emptyHarvestSound);
 	}
 
 	private void Collect()
@@ -149,8 +152,7 @@ public class Harvester : Unit
 		if (currentLoad + collect > capacity) collect = capacity - currentLoad;
 		if (resourceDeposit.isEmpty())
 		{
-			Arms[] arms = GetComponentsInChildren<Arms>();
-			foreach (Arms arm in arms) arm.GetComponent<Renderer>().enabled = false;
+			EnableArms(false);
 			DecideWhatToDo();
 		}
 		else {
@@ -176,6 +178,37 @@ public class Harvester : Unit
 		}
 	}
 
+	private WorldObject FindNearestResource()
+	{
+		List<WorldObject> resources = new List<WorldObject>();
+		foreach (WorldObject nearbyObject in nearbyObjects)
+		{
+			Resource resource = nearbyObject.GetComponent<Resource>();
+			if (resource && !resource.isEmpty())
+				resources.Add(nearbyObject);
+		}
+		return WorkManager.FindNearestWorldObjectInListToPosition(resources, transform.position);
+	}
+
+	private WorldObject FindNearestRefinery()
+	{
+		List<WorldObject> refinerys = new List<WorldObject>();
+		foreach (WorldObject nearbyObject in nearbyObjects)
+		{
+			Refinery refinery = nearbyObject.GetComponent<Refinery>();
+			if (refinery)
+				refinerys.Add(nearbyObject);
+		}
+		return WorkManager.FindNearestWorldObjectInListToPosition(refinerys, transform.position);
+	}
+
+	private void EnableArms(bool enable)
+	{
+		Arms[] arms = GetComponentsInChildren<Arms>();
+		foreach (Arms arm in arms)
+			arm.GetComponent<Renderer>().enabled = enable;
+	}
+
 	protected override void DrawSelectionBox(Rect selectBox)
 	{
 		base.DrawSelectionBox(selectBox);
@@ -187,22 +220,6 @@ public class Harvester : Unit
 		float width = 5;
 		Texture2D resourceBar = ResourceManager.GetResourceHealthBar(harvestType);
 		if (resourceBar) GUI.DrawTexture(new Rect(leftPos, topPos, width, height), resourceBar);
-	}
-
-	public override void SetBuildingId(int buildingId)
-	{
-		base.SetBuildingId(buildingId);
-		resourceStoreId = buildingId;
-	}
-
-	public void SetBuilding()
-	{
-		Building creator = PlayerManager.FindBuilding(playerId, resourceStoreId);
-		if (creator)
-		{
-			resourceStore = creator;
-			resourceStoreId = -1;
-		}
 	}
 
 	protected override void InitialiseAudio()
@@ -234,31 +251,25 @@ public class Harvester : Unit
 	protected override void DecideWhatToDo()
 	{
 		base.DecideWhatToDo();
-		List<WorldObject> resources = new List<WorldObject>();
-		foreach (WorldObject nearbyObject in nearbyObjects)
+		if (IsFull())
 		{
-			Resource resource = nearbyObject.GetComponent<Resource>();
-			if (resource && !resource.isEmpty()) resources.Add(nearbyObject);
-		}
-		WorldObject nearestObject = WorkManager.FindNearestWorldObjectInListToPosition(resources, transform.position);
-		if (nearestObject)
-		{
-			Resource closestResource = nearestObject.GetComponent<Resource>();
-			if (closestResource) StartHarvest(closestResource);
-		}
-		else if (harvesting)
-		{
-			harvesting = false;
-			if ((currentLoad > 0.0f) && (resourceStore))
+			WorldObject nearestObject = FindNearestRefinery();
+			if (nearestObject)
 			{
-				//make sure that we have a whole number to avoid bugs
-				//caused by floating point numbers
-				currentLoad = Mathf.Floor(currentLoad);
 				emptying = true;
-				Arms[] arms = GetComponentsInChildren<Arms>();
-				foreach (Arms arm in arms) arm.GetComponent<Renderer>().enabled = false;
-				StartMove(resourceStore.transform.position, resourceStore.gameObject);
+				StartMove(nearestObject.transform.position, nearestObject.gameObject);
 			}
 		}
+		else
+		{
+			WorldObject nearestObject = FindNearestResource();
+			if (nearestObject)
+			{
+				Resource closestResource = nearestObject.GetComponent<Resource>();
+				if (closestResource)
+					StartHarvest(closestResource);
+			}
+		}
+		
 	}
 }
