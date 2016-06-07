@@ -19,7 +19,8 @@ public class UserInput : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.Escape)) OpenPauseMenu();
 			MoveCamera();
-			RotateCamera();
+            //camera rotation not allowed anymore
+			//RotateCamera();
 			MouseActivity();
 		}
 	}
