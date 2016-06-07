@@ -220,7 +220,7 @@ public abstract class WorldObject : NetworkBehaviour
 			if (!WorkManager.ObjectIsGround(hoverObject))
 			{
 				Player owner = hoverObject.transform.root.GetComponent<Player>();
-				Unit unit = hoverObject.transform.parent.GetComponent<Unit>();
+				Unit unit = hoverObject.transform.root.GetComponent<Unit>();
 				Building building = hoverObject.transform.parent.GetComponent<Building>();
 				if (owner)
 				{ //the object is owned by a player
