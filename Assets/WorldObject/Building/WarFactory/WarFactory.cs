@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class WarFactory : Building
+﻿public class WarFactory : Building
 {
 	protected override void Awake()
 	{
@@ -12,7 +9,8 @@ public class WarFactory : Building
 		sellValue = 125;
 	}
 
-	protected override void Start () {
+	protected override void Start ()
+	{
 		base.Start();
 		actions = new string[] { "Tank", "ConvoyTruck", "Panzer I", "Panzer II", "Panzer III", "Panzer IV" };
 	}

@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class Headquarter : Building
+﻿public class Headquarter : Building
 {
     protected override void Awake()
     {
@@ -28,4 +25,9 @@ public class Headquarter : Building
     {
         return false;
     }
+	
+	protected override void PlayerCreateUnit(int worldObjectId)
+	{
+		player.CmdAddUnit(worldObjectId, buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, -1);
+	}
 }
