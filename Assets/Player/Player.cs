@@ -86,7 +86,17 @@ public class Player : NetworkBehaviour
 		{
 			teamColor = PlayerManager.GetTeamColor(id);
 			handleNetwork = false;
+			if (human && isLocalPlayer)
+			{
+				SetCamera();
+			}
 		}
+	}
+
+	private void SetCamera()
+	{
+		Vector3 position = PlayerManager.GetSpawnPoint(id);
+		Camera.main.transform.position = new Vector3(position.x + 40, 55, position.z - 30);
 	}
 
 	private void SetTempBuilding()
@@ -116,6 +126,8 @@ public class Player : NetworkBehaviour
 		Dictionary<ResourceType, int> list = new Dictionary<ResourceType, int>();
 		list.Add(ResourceType.Money, 0);
 		list.Add(ResourceType.Power, 0);
+		list.Add(ResourceType.Gold, 0);
+		list.Add(ResourceType.Stone, 0);
 		return list;
 	}
 
@@ -205,6 +217,26 @@ public class Player : NetworkBehaviour
 			tempBuilding.hitPoints = 0;
 			tempBuilding.SetColliders(true);
 			tempBuilding.SetPlayingArea(playingArea);
+			NetworkServer.SpawnWithClientAuthority(newBuilding, connectionToClient);
+		}
+		else Destroy(newBuilding);
+	}
+
+	// Add building without construction.
+	[Command]
+	public void CmdAddBuilding(int buildingId, string buildingName, Vector3 buildPoint, Rect playingArea)
+	{
+		GameObject newBuilding = (GameObject)Instantiate(ResourceManager.GetBuilding(buildingName), buildPoint, new Quaternion());
+		Building tempBuilding = newBuilding.GetComponent<Building>();
+		if (tempBuilding)
+		{
+			tempBuilding.SetId(buildingId);
+			tempBuilding.SetPlayerId(id);
+			tempBuilding.hitPoints = tempBuilding.maxHitPoints;
+			tempBuilding.SetColliders(true);
+			tempBuilding.SetPlayingArea(playingArea);
+			tempBuilding.isTempBuilding = false;
+			tempBuilding.RestoreMaterials();
 			NetworkServer.SpawnWithClientAuthority(newBuilding, connectionToClient);
 		}
 		else Destroy(newBuilding);

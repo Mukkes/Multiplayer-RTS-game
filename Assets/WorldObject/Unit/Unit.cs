@@ -212,7 +212,6 @@ public class Unit : WorldObject
 	
 	public void SetDestination(Vector3 destination)
 	{
-		Debug.Log("SetDestination!");
 		destinationX = destination.x;
 		destinationZ = destination.z;
 	}
