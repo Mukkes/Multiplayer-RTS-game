@@ -18,11 +18,6 @@ public class Worker : Unit
 	protected override void Awake()
 	{
 		base.Awake();
-		objectName = "Worker";
-		hitPoints = 50;
-		maxHitPoints = 50;
-		cost = 50;
-		sellValue = 25;
 	}
 
 	protected override void Start()

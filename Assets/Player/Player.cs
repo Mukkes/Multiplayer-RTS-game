@@ -178,7 +178,7 @@ public class Player : NetworkBehaviour
 			unitObject.SetId(unitId);
 			unitObject.SetPlayerId(id);
 			unitObject.SetBuildingId(creator);
-			if (spawnPoint != rallyPoint) unitObject.StartMove(rallyPoint);
+			if (spawnPoint != rallyPoint) unitObject.SetDestination(rallyPoint);
 			NetworkServer.SpawnWithClientAuthority(newUnit, connectionToClient);
 		}
 		else Destroy(newUnit);

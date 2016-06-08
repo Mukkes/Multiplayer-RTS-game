@@ -91,11 +91,16 @@ public class Building : WorldObject
 				{
 					if (audioElement != null) audioElement.Play(finishedJobSound);
 					int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
-					player.CmdAddUnit(worldObjectId, buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, id);
+					PlayerCreateUnit(worldObjectId);
 				}
 				currentBuildProgress = 0.0f;
 			}
 		}
+	}
+
+	protected virtual void PlayerCreateUnit(int worldObjectId)
+	{
+		player.CmdAddUnit(worldObjectId, buildQueue.Dequeue(), spawnPoint, rallyPoint, transform.rotation, id);
 	}
 
 	protected override void InitialiseAudio()

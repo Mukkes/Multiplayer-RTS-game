@@ -1,9 +1,15 @@
 ﻿using UnityEngine;
 using RTS;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public class Unit : WorldObject
 {
+	[SyncVar]
+	private float destinationX = 0;
+	[SyncVar]
+	private float destinationZ = 0;
+
 	public float moveSpeed, rotateSpeed;
 	public AudioClip driveSound, moveSound;
 	public float driveVolume = 0.5f, moveVolume = 1.0f;
@@ -24,6 +30,14 @@ public class Unit : WorldObject
 	protected override void Start()
 	{
 		base.Start();
+		if ((destinationX != 0) || (destinationZ != 0))
+		{
+			destination.x = destinationX;
+			destination.z = destinationZ;
+			StartMove(destination);
+			destinationX = 0;
+			destinationZ = 0;
+		}
 	}
 
 	protected override void Update()
@@ -194,5 +208,12 @@ public class Unit : WorldObject
 	{
 		Units units = player.GetComponentInChildren<Units>();
 		transform.parent = units.transform;
+	}
+	
+	public void SetDestination(Vector3 destination)
+	{
+		Debug.Log("SetDestination!");
+		destinationX = destination.x;
+		destinationZ = destination.z;
 	}
 }
