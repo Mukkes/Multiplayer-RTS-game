@@ -179,7 +179,10 @@ public abstract class WorldObject : NetworkBehaviour
 		selectionBounds = new Bounds(transform.position, Vector3.zero);
 		foreach (Renderer r in GetComponentsInChildren<Renderer>())
 		{
-			selectionBounds.Encapsulate(r.bounds);
+			if (!r.name.Equals("MiniMap"))
+			{
+				selectionBounds.Encapsulate(r.bounds);
+			}
 		}
 	}
 

@@ -23,7 +23,7 @@ public class Worker : Unit
 	protected override void Start()
 	{
 		base.Start();
-		actions = new string[] { "Refinery", "WarFactory", "Turrent", "Wonder", "FarmHouse", "Barracks", "Headquarter" };
+		actions = new string[] { "Refinery", "WarFactory", "Turrent", "Wonder", "Headquarter" };
 	}
 
 	protected override void Update()
