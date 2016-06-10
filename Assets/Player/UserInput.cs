@@ -20,10 +20,38 @@ public class UserInput : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.Escape)) OpenPauseMenu();
 			MoveCamera();
             //camera rotation not allowed anymore
-			//RotateCamera();
-			MouseActivity();
+            //RotateCamera();
+            MoveCameraByKeys();
+            MouseActivity();
 		}
 	}
+
+    private void MoveCameraByKeys()
+    {
+     
+        if (Input.GetKey(KeyCode.A))
+        {
+            Camera.main.transform.position += Vector3.left * ResourceManager.ScrollSpeed * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            Camera.main.transform.position += Vector3.right * ResourceManager.ScrollSpeed * Time.deltaTime;
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            Camera.main.transform.position += Vector3.back * ResourceManager.ScrollSpeed * Time.deltaTime;
+        }
+        if (Input.GetKey(KeyCode.W))
+        {
+            Camera.main.transform.position += Vector3.forward * ResourceManager.ScrollSpeed * Time.deltaTime;
+        }
+
+
+
+    }
+
 
 	private void MoveCamera()
 	{

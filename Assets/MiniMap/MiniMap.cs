@@ -11,7 +11,7 @@ public class MiniMap : MonoBehaviour, IPointerDownHandler {
     public void OnPointerDown(PointerEventData ped)
     {
         Vector3 localHit = transform.InverseTransformPoint(ped.pressPosition);
-        clickMousePos = new Vector3((2000 / 256) * localHit.x + 50, Camera.main.transform.position.y, (2000 / 256) * localHit.y - 20);
+        clickMousePos = new Vector3((1000 / 256) * localHit.x + 50, Camera.main.transform.position.y, (1000 / 256) * localHit.y - 20);
         Camera.main.transform.position = clickMousePos;
     }
 }
