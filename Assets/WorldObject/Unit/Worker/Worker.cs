@@ -75,9 +75,18 @@ public class Worker : Unit
 
 	private void CreateBuilding(string buildingName)
 	{
-		Vector3 buildPoint = new Vector3(transform.position.x, transform.position.y, transform.position.z + 10);
-		int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
-		if (player) player.CreateBuilding(worldObjectId, buildingName, buildPoint, this, playingArea);
+		GameObject building = ResourceManager.GetBuilding(buildingName);
+		Building buildingObject = building.GetComponent<Building>();
+		if (player && buildingObject)
+		{
+			if (player.GetResourceAmount(ResourceType.Money) < buildingObject.cost)
+			{
+				return;
+			}
+			Vector3 buildPoint = new Vector3(transform.position.x, transform.position.y, transform.position.z + 10);
+			int worldObjectId = PlayerManager.GetUniqueWorldObjectId();
+			player.CreateBuilding(worldObjectId, buildingName, buildPoint, this, playingArea);
+		}
 	}
 
 	public override void SetBuildingId(int buildingId)

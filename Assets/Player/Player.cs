@@ -16,7 +16,8 @@ public class Player : NetworkBehaviour
 	[SyncVar]
 	public string username;
 
-	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
+	public int startMoney, startMoneyLimit;
+	//public int startPower, startPowerLimit;
 	public bool human;
 	public HUD hud;
 	public Material notAllowedMaterial, allowedMaterial;
@@ -125,22 +126,22 @@ public class Player : NetworkBehaviour
 	{
 		Dictionary<ResourceType, int> list = new Dictionary<ResourceType, int>();
 		list.Add(ResourceType.Money, 0);
-		list.Add(ResourceType.Power, 0);
-		list.Add(ResourceType.Gold, 0);
-		list.Add(ResourceType.Stone, 0);
+		//list.Add(ResourceType.Power, 0);
+		//list.Add(ResourceType.Gold, 0);
+		//list.Add(ResourceType.Stone, 0);
 		return list;
 	}
 
 	private void AddStartResourceLimits()
 	{
 		IncrementResourceLimit(ResourceType.Money, startMoneyLimit);
-		IncrementResourceLimit(ResourceType.Power, startPowerLimit);
+		//IncrementResourceLimit(ResourceType.Power, startPowerLimit);
 	}
 
 	private void AddStartResources()
 	{
 		AddResource(ResourceType.Money, startMoney);
-		AddResource(ResourceType.Power, startPower);
+		//AddResource(ResourceType.Power, startPower);
 	}
 
 	[Command]

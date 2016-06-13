@@ -76,7 +76,14 @@ public class Building : WorldObject
 	{
 		GameObject unit = ResourceManager.GetUnit(unitName);
 		Unit unitObject = unit.GetComponent<Unit>();
-		if (player && unitObject) player.RemoveResource(ResourceType.Money, unitObject.cost);
+		if (player && unitObject)
+		{
+			if (player.GetResourceAmount(ResourceType.Money) < unitObject.cost)
+			{
+				return;
+			}
+			player.RemoveResource(ResourceType.Money, unitObject.cost);
+		}
 		buildQueue.Enqueue(unitName);
 	}
 
