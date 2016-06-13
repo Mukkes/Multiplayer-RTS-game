@@ -58,11 +58,11 @@ public class HUD : MonoBehaviour
 					resourceValues.Add(ResourceType.Money, 0);
 					resourceLimits.Add(ResourceType.Money, 0);
 					break;
-				case "Power":
-					resourceImages.Add(ResourceType.Power, resources[i]);
-					resourceValues.Add(ResourceType.Power, 0);
-					resourceLimits.Add(ResourceType.Power, 0);
-					break;
+				//case "Power":
+				//	resourceImages.Add(ResourceType.Power, resources[i]);
+				//	resourceValues.Add(ResourceType.Power, 0);
+				//	resourceLimits.Add(ResourceType.Power, 0);
+				//	break;
 				default: break;
 			}
 		}
@@ -159,11 +159,11 @@ public class HUD : MonoBehaviour
 		GUI.BeginGroup(new Rect(0, 0, Screen.width, RESOURCE_BAR_HEIGHT));
 		GUI.Box(new Rect(0, 0, Screen.width, RESOURCE_BAR_HEIGHT), "");
 
-		int topPos = 4, iconLeft = 4, textLeft = 20;
+		int topPos = 4, iconLeft = 4, textLeft = 40;
 		DrawResourceIcon(ResourceType.Money, iconLeft, textLeft, topPos);
-		iconLeft += TEXT_WIDTH;
-		textLeft += TEXT_WIDTH;
-		DrawResourceIcon(ResourceType.Power, iconLeft, textLeft, topPos);
+		//iconLeft += TEXT_WIDTH;
+		//textLeft += TEXT_WIDTH;
+		//DrawResourceIcon(ResourceType.Power, iconLeft, textLeft, topPos);
 
 		int padding = 7;
 		int buttonWidth = ORDERS_BAR_WIDTH - 2 * padding - SCROLL_BAR_WIDTH;
@@ -311,7 +311,7 @@ public class HUD : MonoBehaviour
 		Texture2D icon = resourceImages[type];
 		string text = resourceValues[type].ToString() + "/" + resourceLimits[type].ToString();
 		GUI.DrawTexture(new Rect(iconLeft, topPos, ICON_WIDTH, ICON_HEIGHT), icon);
-		GUI.Label(new Rect(textLeft, topPos, TEXT_WIDTH, TEXT_HEIGHT), text);
+		GUI.Label(new Rect(textLeft, topPos + 5, TEXT_WIDTH, TEXT_HEIGHT), text);
 	}
 
 	private void DrawActions(string[] actions)
