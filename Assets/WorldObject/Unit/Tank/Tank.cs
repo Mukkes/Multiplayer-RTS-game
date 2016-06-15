@@ -6,16 +6,12 @@ using UnityEngine.Networking;
 
 public class Tank : Unit {
 
+	public string projectileName;
 	private Quaternion aimRotation;
 
 	protected override void Awake()
 	{
 		base.Awake();
-		objectName = "Tank";
-		hitPoints = 150;
-		maxHitPoints = 150;
-		cost = 150;
-		sellValue = 75;
 	}
 
 	// Use this for initialization
@@ -63,7 +59,7 @@ public class Tank : Unit {
 		spawnPoint.x += (2.1f * transform.forward.x);
 		spawnPoint.y += 1.4f;
 		spawnPoint.z += (2.1f * transform.forward.z);
-		GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject("TankProjectile"), spawnPoint, transform.rotation);
+		GameObject gameObject = (GameObject)Instantiate(ResourceManager.GetWorldObject(projectileName), spawnPoint, transform.rotation);
 		Projectile projectile = gameObject.GetComponentInChildren<Projectile>();
 		projectile.SetRange(0.9f * weaponRange);
 		projectile.SetTarget(targetPlayerId, targetId);

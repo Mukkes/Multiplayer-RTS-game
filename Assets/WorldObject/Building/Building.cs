@@ -222,7 +222,7 @@ public class Building : WorldObject
 
 	public void Construct(int amount)
 	{
-		CmdSetHitPoints(hitPoints + amount);
+		CmdAddHitPoints(amount);
 		if (hitPoints >= maxHitPoints)
 		{
 			CmdSetHitPoints(maxHitPoints);

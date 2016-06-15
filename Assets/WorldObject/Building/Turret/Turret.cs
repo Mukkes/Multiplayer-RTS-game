@@ -10,10 +10,6 @@ public class Turret : Building
 	protected override void Awake()
 	{
 		base.Awake();
-		objectName = "Turrent";
-		maxHitPoints = 50;
-		cost = 150;
-		sellValue = 75;
 	}
 
 	protected override void Start()

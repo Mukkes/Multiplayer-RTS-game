@@ -3,10 +3,6 @@
     protected override void Awake()
     {
         base.Awake();
-        objectName = "Headquarter";
-        maxHitPoints = 100;
-        cost = 250;
-        sellValue = 125;
     }
 
     protected override void Start()

@@ -6,10 +6,6 @@ public class Barracks : Building
     protected override void Awake()
     {
         base.Awake();
-        objectName = "Barracks";
-        maxHitPoints = 100;
-        cost = 250;
-        sellValue = 125;
     }
 
     protected override void Start()

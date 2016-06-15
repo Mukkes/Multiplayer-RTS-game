@@ -25,7 +25,7 @@ public class Player : NetworkBehaviour
 	// Check if network things has been done.
 	public bool handleNetwork = true;
 	
-	private Dictionary<ResourceType, int> resources, resourceLimits;
+	public Dictionary<ResourceType, int> resources, resourceLimits;
 	private Building tempBuilding;
 	private Unit tempCreator;
 	
