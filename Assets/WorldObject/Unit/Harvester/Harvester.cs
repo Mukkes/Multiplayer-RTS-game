@@ -23,11 +23,6 @@ public class Harvester : Unit
 	protected override void Awake()
 	{
 		base.Awake();
-		objectName = "Harvester";
-		hitPoints = 100;
-		maxHitPoints = 100;
-		cost = 100;
-		sellValue = 50;
 	}
 
 	protected override void Start()

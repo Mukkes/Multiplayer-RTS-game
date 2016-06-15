@@ -1,4 +1,1 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class TankProjectile : Projectile { }
+﻿public class TankProjectile : Projectile { }

@@ -191,6 +191,12 @@ public abstract class WorldObject : NetworkBehaviour
 	{
 		this.hitPoints = hitPoints;
 	}
+	
+	[Command]
+	protected void CmdAddHitPoints(int hitPoints)
+	{
+		this.hitPoints += hitPoints;
+	}
 
 	protected virtual void DrawSelectionBox(Rect selectBox)
 	{
