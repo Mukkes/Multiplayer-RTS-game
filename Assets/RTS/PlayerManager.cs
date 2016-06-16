@@ -237,10 +237,10 @@ namespace RTS
 
 		private static Vector3[] spawnPoints =
 		{
-			new Vector3(-200, 0, 0),
-			new Vector3(200, 0, 0),
-			new Vector3(0, 0, 200),
-			new Vector3(0, 0, -200)
+			new Vector3(-100, 0, 0),
+			new Vector3(100, 0, 0),
+			new Vector3(0, 0, 100),
+			new Vector3(0, 0, -100)
 		};
 
 		public static Vector3 GetSpawnPoint(int id)

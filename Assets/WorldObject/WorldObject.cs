@@ -460,7 +460,8 @@ public abstract class WorldObject : NetworkBehaviour
 			{
 				Resource resource = nearbyObject.GetComponent<Resource>();
 				if (resource) continue;
-				if (!nearbyObject.GetPlayer().Equals(player)) enemyObjects.Add(nearbyObject);
+				Player nearbyPlayer = nearbyObject.GetPlayer();
+				if ((nearbyPlayer) && (!nearbyPlayer.Equals(player))) enemyObjects.Add(nearbyObject);
 			}
 			WorldObject closestObject = WorkManager.FindNearestWorldObjectInListToPosition(enemyObjects, currentPosition);
 			if (closestObject) BeginAttack(closestObject);

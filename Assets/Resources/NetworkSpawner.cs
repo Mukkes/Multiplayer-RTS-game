@@ -14,18 +14,18 @@ public class NetworkSpawner : NetworkBehaviour
 		new Vector3(0, 0, -160)
 	};
 	public List<Vector3> orePositions = new List<Vector3>() {
-		new Vector3(-230, 0, -20),
-		new Vector3(170, 0, -20),
-		new Vector3(-30, 0, 180),
-		new Vector3(-30, 0, -220),
-		new Vector3(-200, 0, 40),
-		new Vector3(200, 0, 40),
-		new Vector3(0, 0, 240),
-		new Vector3(0, 0, -160),
-		new Vector3(-160, 0, 0),
-		new Vector3(240, 0, 0),
-		new Vector3(40, 0, 200),
-		new Vector3(40, 0, -200)
+		new Vector3(-130, 0, -20),
+		new Vector3(70, 0, -20),
+		new Vector3(-30, 0, 80),
+		new Vector3(-30, 0, -120),
+		new Vector3(-100, 0, 40),
+		new Vector3(100, 0, 40),
+		new Vector3(0, 0, 140),
+		new Vector3(0, 0, -60),
+		new Vector3(-60, 0, 0),
+		new Vector3(140, 0, 0),
+		new Vector3(40, 0, 100),
+		new Vector3(40, 0, -100)
 	};
 	public List<Vector3> stonePositions = new List<Vector3>() {
 		new Vector3(-160, 0, 0),
